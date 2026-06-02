@@ -123,6 +123,8 @@
 
     /* ── SCREENS ─────────────────────────────────── */
     .screen { display: none; width: 100%; max-width: 1000px; }
+    /* Galerie bekommt mehr Breite für größere Karten */
+    #screenGallery { max-width: min(1280px, calc(100vw - 40px)); }
     .screen.active { display: block; animation: appear .22s ease both; }
 
     @keyframes appear {
@@ -336,6 +338,61 @@
     .legal-p strong { opacity: 1; font-weight: 700; }
     .legal-p.small { font-size: 12px; opacity: 0.45; margin-top: 40px; }
 
+    /* ── VISITOR COUNTER ─────────────────────────── */
+    .visitor-counter {
+      margin-top: 48px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .visitor-counter-title {
+      font-size: 13px; font-weight: 600; letter-spacing: 0.5px;
+      text-transform: uppercase; opacity: 0.5; margin-bottom: 20px;
+    }
+
+    .visitor-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 80px;
+    }
+
+    .visitor-bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .visitor-bar-fill {
+      width: 100%;
+      background: white;
+      border-radius: 3px 3px 0 0;
+      min-height: 2px;
+      transition: height 0.8s cubic-bezier(0.22,1,0.36,1);
+    }
+
+    .visitor-bar-fill.today { background: white; }
+    .visitor-bar-fill.past  { background: rgba(255,255,255,0.4); }
+
+    .visitor-bar-label {
+      font-size: 10px; font-weight: 600;
+      opacity: 0.5; text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .visitor-bar-label.today { opacity: 1; }
+
+    .visitor-total {
+      margin-top: 16px;
+      font-size: 12px; opacity: 0.45;
+    }
+
+    .visitor-total strong { opacity: 1; font-weight: 700; }
+
     /* ── BREED MODAL ─────────────────────────────── */
     .breed-modal {
       position: fixed; inset: 0;
@@ -411,7 +468,12 @@
       .dots-area { padding-left: 20px; }
       .card-tail { left: 20px; }
       .gal-header-title { font-size: 36px; }
-      .gal-grid { gap: 4px; padding: 4px; }
+      .gal-grid { gap: 4px; padding: 4px; grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* Tablet: 3 Spalten bleiben, aber etwas enger */
+    @media (min-width: 601px) and (max-width: 900px) {
+      #screenGallery { max-width: calc(100vw - 32px); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -455,7 +517,7 @@
     </li>
     <!-- Zeile 2: Kontakt | Impressum -->
     <li class="pill-col" role="none">
-      <a class="pill-link" href="mailto:Nico@efeldmann.de" style="--rot:5deg" aria-label="Kontakt" role="menuitem">
+      <a class="pill-link" href="mailto:nico@efeldmann.de" style="--rot:5deg" aria-label="Kontakt" role="menuitem">
         <span class="pill-label">Kontakt</span>
       </a>
     </li>
@@ -633,6 +695,15 @@
     </div>
 
     <div class="legal-p small">Quelle: <a href="https://www.e-recht24.de" target="_blank" rel="noopener">e-recht24.de</a> &mdash; &copy; 2026 Nico Feldmann. Alle Rechte vorbehalten.</div>
+
+    <!-- Besucherzähler letzte 7 Tage -->
+    <div class="visitor-counter" id="visitorCounter">
+      <div class="visitor-counter-title">Seitenaufrufe &mdash; letzte 7 Tage</div>
+      <div class="visitor-bars" id="visitorBars">
+        <!-- filled by JS -->
+      </div>
+      <div class="visitor-total" id="visitorTotal">Lade Statistik…</div>
+    </div>
   </div>
 
   <!-- GALLERY -->
@@ -1267,6 +1338,91 @@ document.addEventListener('keydown', e => {
 // Cat paw cursor — grab on mousedown, release on mouseup
 document.addEventListener('mousedown', () => document.documentElement.classList.add('paw-grab'));
 document.addEventListener('mouseup',   () => document.documentElement.classList.remove('paw-grab'));
+
+/* ── VISITOR COUNTER ─────────────────────────────────────── */
+(function () {
+  const NS  = 'catoamt-visits-v2';
+  const DAY_NAMES = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+  function getKey(offsetDays) {
+    const d = new Date();
+    d.setDate(d.getDate() - offsetDays);
+    return d.toISOString().slice(0, 10); // YYYY-MM-DD
+  }
+
+  function getDayLabel(offsetDays) {
+    const d = new Date();
+    d.setDate(d.getDate() - offsetDays);
+    return DAY_NAMES[d.getDay()];
+  }
+
+  // Increment heutigen Zähler (einmal pro Browser-Session)
+  async function trackVisit() {
+    const todayKey = getKey(0);
+    const lastTracked = sessionStorage.getItem('catomat-tracked');
+    if (lastTracked === todayKey) return; // bereits in dieser Session gezählt
+    sessionStorage.setItem('catomat-tracked', todayKey);
+    try {
+      await fetch(`https://api.countapi.xyz/hit/${NS}/${todayKey}`);
+    } catch (_) { /* silent fail */ }
+  }
+
+  // Letzte 7 Tage laden und anzeigen
+  async function loadAndRender() {
+    const barsEl  = document.getElementById('visitorBars');
+    const totalEl = document.getElementById('visitorTotal');
+    if (!barsEl) return;
+
+    // Zähle 7 Tage: Index 0 = heute, 6 = vor 6 Tagen
+    const days = Array.from({ length: 7 }, (_, i) => ({
+      key:   getKey(6 - i),       // ältester zuerst → neuester rechts
+      label: getDayLabel(6 - i),
+      isToday: (6 - i) === 0
+    }));
+
+    let counts = [];
+    try {
+      counts = await Promise.all(
+        days.map(d =>
+          fetch(`https://api.countapi.xyz/get/${NS}/${d.key}`)
+            .then(r => r.json())
+            .then(j => j.value || 0)
+            .catch(() => 0)
+        )
+      );
+    } catch (_) {
+      counts = new Array(7).fill(0);
+    }
+
+    const maxCount = Math.max(...counts, 1); // avoid /0
+    const total7   = counts.reduce((a, b) => a + b, 0);
+
+    barsEl.innerHTML = days.map((d, i) => `
+      <div class="visitor-bar-col">
+        <div class="visitor-bar-fill ${d.isToday ? 'today' : 'past'}"
+             style="height: ${Math.max(2, Math.round((counts[i] / maxCount) * 64))}px"
+             title="${counts[i]} Aufrufe"></div>
+        <div class="visitor-bar-label ${d.isToday ? 'today' : ''}">${d.label}</div>
+      </div>`).join('');
+
+    totalEl.innerHTML = `Gesamt letzte 7 Tage: <strong>${total7} Aufrufe</strong> &nbsp;·&nbsp; Heute (${days[6].label}): <strong>${counts[6]}</strong>`;
+  }
+
+  // Auf jeder Seite tracken + nur im Datenschutz anzeigen
+  trackVisit();
+
+  // Wenn Datenschutz-Screen sichtbar wird → laden
+  const origShowScreen = window.showScreen;
+  // MutationObserver auf screenDatenschutz
+  const obs = new MutationObserver(() => {
+    const screen = document.getElementById('screenDatenschutz');
+    if (screen && screen.classList.contains('active')) {
+      loadAndRender();
+    }
+  });
+  const target = document.getElementById('screenDatenschutz');
+  if (target) obs.observe(target, { attributes: true, attributeFilter: ['class'] });
+})();
 </script>
 </body>
 </html>
