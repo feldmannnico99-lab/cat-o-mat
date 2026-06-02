@@ -152,7 +152,7 @@
     .start-meta-item strong { display: block; font-size: 32px; font-weight: 800; }
     .start-meta-item span   { font-size: 13px; opacity: 0.55; font-weight: 500; }
     .start-card-img { width: 210px; flex-shrink: 0; border-left: 1.5px solid rgba(255,255,255,0.18); overflow: hidden; display: flex; align-items: flex-end; }
-    .start-card-img img { width: 100%; display: block; filter: invert(1); }
+    .start-card-img img { width: 100%; display: block; filter: invert(1) grayscale(1); }
 
     /* ── QUESTION ────────────────────────────────── */
     .q-header { font-size: 14px; font-weight: 700; margin-bottom: 22px; }
@@ -186,7 +186,7 @@
     .results-label { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 20px; opacity: 0.6; }
     .top-match-hero { display: flex; align-items: flex-start; gap: 28px; margin-bottom: 20px; }
     .top-match-img { width: 160px; flex-shrink: 0; }
-    .top-match-img img { width: 100%; display: block; filter: invert(1); }
+    .top-match-img img { width: 100%; display: block; filter: invert(1) grayscale(1); }
     .top-match-line { font-size: clamp(20px, 3vw, 32px); font-weight: 700; line-height: 1.2; margin-bottom: 10px; }
     .top-match-desc { font-size: 15px; font-weight: 400; opacity: 0.7; line-height: 1.6; max-width: 560px; }
     .hinweis-box { margin: 16px 0 24px; padding: 12px 16px; border: 1px dashed rgba(255,255,255,0.5); font-size: 13px; font-weight: 600; opacity: 0.85; line-height: 1.5; display: none; border-radius: 8px; }
@@ -196,7 +196,7 @@
     .breed-row:last-child { border-bottom: 1px solid rgba(255,255,255,0.1); }
     .breed-info { display: flex; align-items: center; gap: 10px; }
     .breed-thumb { width: 46px; height: 46px; flex-shrink: 0; overflow: hidden; }
-    .breed-thumb img { width: 100%; height: 100%; object-fit: contain; filter: invert(1); display: block; }
+    .breed-thumb img { width: 100%; height: 100%; object-fit: contain; filter: invert(1) grayscale(1); display: block; }
     .breed-name { font-size: 14px; font-weight: 700; }
     .breed-tag  { font-size: 11px; opacity: 0.45; font-weight: 500; margin-top: 1px; }
     .breed-note-tag { font-size: 10px; font-weight: 700; border: 1px solid rgba(255,255,255,0.4); padding: 1px 5px; margin-top: 3px; display: inline-block; letter-spacing: 0.3px; opacity: 0.7; border-radius: 3px; }
@@ -272,7 +272,7 @@
 
     .gal-item img {
       width: 100%; height: 100%;
-      object-fit: contain; filter: invert(1); display: block;
+      object-fit: contain; filter: invert(1) grayscale(1); display: block;
       transition: transform 0.38s cubic-bezier(0.22,1,0.36,1);
     }
 
@@ -297,6 +297,37 @@
       max-width: 960px; margin: 0 auto;
       padding: 24px 20px 40px;
     }
+
+    /* ── LEGAL PAGES (Impressum / Datenschutz) ───── */
+    .legal-screen { max-width: 760px; }
+
+    .legal-back {
+      display: flex; align-items: center; gap: 8px;
+      background: none; border: none; color: white;
+      font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600;
+      cursor: pointer; opacity: 0.65; margin-bottom: 32px;
+      padding: 0; transition: opacity .15s;
+    }
+    .legal-back:hover { opacity: 1; }
+
+    .legal-title {
+      font-size: clamp(28px, 5vw, 56px);
+      font-weight: 900; letter-spacing: -1px; line-height: 1;
+      margin-bottom: 40px;
+    }
+
+    .legal-section { margin-bottom: 32px; }
+    .legal-h2 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .legal-h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; opacity: 0.8; }
+
+    .legal-p {
+      font-size: 14px; line-height: 1.75; opacity: 0.72;
+      margin-bottom: 12px;
+    }
+
+    .legal-p a { color: white; opacity: 0.9; }
+    .legal-p strong { opacity: 1; font-weight: 700; }
+    .legal-p.small { font-size: 12px; opacity: 0.45; margin-top: 40px; }
 
     /* ── BREED MODAL ─────────────────────────────── */
     .breed-modal {
@@ -330,7 +361,7 @@
     }
     .breed-modal-close:hover { opacity: 1; }
 
-    .breed-modal-img { width: 100px; display: block; filter: invert(1); margin-bottom: 20px; }
+    .breed-modal-img { width: 100px; display: block; filter: invert(1) grayscale(1); margin-bottom: 20px; }
     .breed-modal-name { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
     .breed-modal-desc { font-size: 15px; opacity: 0.72; line-height: 1.65; }
 
@@ -420,12 +451,12 @@
       </a>
     </li>
     <li class="pill-col" role="none">
-      <a class="pill-link" href="#impressum" style="--rot:-5deg" aria-label="Impressum" role="menuitem">
+      <a class="pill-link" id="menuImpressum" href="#" style="--rot:-5deg" aria-label="Impressum" role="menuitem">
         <span class="pill-label">Impressum</span>
       </a>
     </li>
     <li class="pill-col" role="none">
-      <a class="pill-link" href="#datenschutz" style="--rot:5deg" aria-label="Datenschutz" role="menuitem">
+      <a class="pill-link" id="menuDatenschutz" href="#" style="--rot:5deg" aria-label="Datenschutz" role="menuitem">
         <span class="pill-label">Datenschutz</span>
       </a>
     </li>
@@ -525,6 +556,75 @@
     <div class="dots-area" id="resultDots"></div>
   </div>
 
+  <!-- IMPRESSUM -->
+  <div class="screen legal-screen" id="screenImpressum">
+    <button class="legal-back" onclick="restartQuiz()">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M13 8H3M3 8L7 4M3 8L7 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Zurück
+    </button>
+    <div class="legal-title">Impressum</div>
+    <div class="legal-section">
+      <div class="legal-h2">Angaben gemäß § 5 TMG</div>
+      <div class="legal-p">Nico Feldmann<br>Klausenburger Gasse 8<br>51674 Wiehl</div>
+    </div>
+    <div class="legal-section">
+      <div class="legal-h2">Kontakt</div>
+      <div class="legal-p">E-Mail: <a href="mailto:Nico@efeldmann.de">Nico@efeldmann.de</a></div>
+    </div>
+    <div class="legal-section">
+      <div class="legal-h2">Verbraucherstreitbeilegung / Universalschlichtungsstelle</div>
+      <div class="legal-p">Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</div>
+    </div>
+    <div class="legal-p small">Quelle: <a href="https://www.e-recht24.de/impressum-generator.html" target="_blank" rel="noopener">e-recht24.de</a></div>
+  </div>
+
+  <!-- DATENSCHUTZ -->
+  <div class="screen legal-screen" id="screenDatenschutz">
+    <button class="legal-back" onclick="restartQuiz()">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M13 8H3M3 8L7 4M3 8L7 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Zurück
+    </button>
+    <div class="legal-title">Datenschutz&shy;erklärung</div>
+
+    <div class="legal-section">
+      <div class="legal-h2">1. Datenschutz auf einen Blick</div>
+      <div class="legal-h3">Allgemeine Hinweise</div>
+      <div class="legal-p">Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese Website besuchen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.</div>
+      <div class="legal-h3">Datenerfassung auf dieser Website</div>
+      <div class="legal-p">Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen Kontaktdaten können Sie dem Abschnitt „Hinweis zur Verantwortlichen Stelle" in dieser Datenschutzerklärung entnehmen.</div>
+      <div class="legal-p">Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese mitteilen. Andere Daten werden automatisch beim Besuch der Website durch unsere IT-Systeme erfasst (z. B. Internetbrowser, Betriebssystem, Uhrzeit des Seitenaufrufs).</div>
+      <div class="legal-p">Sie haben jederzeit das Recht, unentgeltlich Auskunft über Herkunft, Empfänger und Zweck Ihrer gespeicherten personenbezogenen Daten zu erhalten sowie ein Recht auf Berichtigung oder Löschung dieser Daten.</div>
+    </div>
+
+    <div class="legal-section">
+      <div class="legal-h2">2. Hosting</div>
+      <div class="legal-h3">Externes Hosting</div>
+      <div class="legal-p">Diese Website wird extern gehostet. Wir setzen folgenden Hoster ein:<br><br><strong>GitHub, Inc.</strong><br>88 Colin P Kelly Jr St<br>San Francisco, CA 94107<br>USA</div>
+      <div class="legal-p">Das externe Hosting erfolgt zum Zwecke der Vertragserfüllung gegenüber potenziellen und bestehenden Nutzern (Art. 6 Abs. 1 lit. b DSGVO) und im Interesse einer sicheren, schnellen und effizienten Bereitstellung unseres Online-Angebots durch einen professionellen Anbieter (Art. 6 Abs. 1 lit. f DSGVO).</div>
+    </div>
+
+    <div class="legal-section">
+      <div class="legal-h2">3. Allgemeine Hinweise und Pflichtinformationen</div>
+      <div class="legal-h3">Hinweis zur verantwortlichen Stelle</div>
+      <div class="legal-p">Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:<br><br><strong>Nico Feldmann</strong><br>Klausenburger Gasse 8<br>51674 Wiehl<br><br>E-Mail: <a href="mailto:Nico@efeldmann.de">Nico@efeldmann.de</a></div>
+      <div class="legal-h3">Speicherdauer</div>
+      <div class="legal-p">Soweit innerhalb dieser Datenschutzerklärung keine speziellere Speicherdauer genannt wurde, verbleiben Ihre personenbezogenen Daten bei uns, bis der Zweck für die Datenverarbeitung entfällt.</div>
+      <div class="legal-h3">SSL- bzw. TLS-Verschlüsselung</div>
+      <div class="legal-p">Diese Seite nutzt aus Sicherheitsgründen eine SSL- bzw. TLS-Verschlüsselung. Eine verschlüsselte Verbindung erkennen Sie daran, dass die Adresszeile des Browsers von „http://" auf „https://" wechselt.</div>
+    </div>
+
+    <div class="legal-section">
+      <div class="legal-h2">4. Datenerfassung auf dieser Website</div>
+      <div class="legal-h3">Server-Log-Dateien</div>
+      <div class="legal-p">Der Provider der Seiten erhebt und speichert automatisch Informationen in Server-Log-Dateien, die Ihr Browser automatisch übermittelt. Dies sind: Browsertyp und -version, verwendetes Betriebssystem, Referrer URL, Hostname des zugreifenden Rechners, Uhrzeit der Serveranfrage, IP-Adresse.</div>
+      <div class="legal-p">Die Erfassung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO.</div>
+      <div class="legal-h3">Anfrage per E-Mail</div>
+      <div class="legal-p">Wenn Sie uns per E-Mail kontaktieren, wird Ihre Anfrage inklusive aller daraus hervorgehenden personenbezogenen Daten zum Zwecke der Bearbeitung Ihres Anliegens bei uns gespeichert. Diese Daten geben wir nicht ohne Ihre Einwilligung weiter.</div>
+    </div>
+
+    <div class="legal-p small">Quelle: <a href="https://www.e-recht24.de" target="_blank" rel="noopener">e-recht24.de</a> &mdash; &copy; 2026 Nico Feldmann. Alle Rechte vorbehalten.</div>
+  </div>
+
   <!-- GALLERY -->
   <div class="screen" id="screenGallery">
     <div class="gal-header">
@@ -606,6 +706,12 @@
   document.getElementById('menuGallery').addEventListener('click', e => {
     e.preventDefault(); closeMenu(() => showGallery());
   });
+  document.getElementById('menuImpressum').addEventListener('click', e => {
+    e.preventDefault(); closeMenu(() => { window.scrollTo(0,0); showScreen('screenImpressum'); });
+  });
+  document.getElementById('menuDatenschutz').addEventListener('click', e => {
+    e.preventDefault(); closeMenu(() => { window.scrollTo(0,0); showScreen('screenDatenschutz'); });
+  });
 
   overlay.addEventListener('click', e => { if (e.target === overlay) closeMenu(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && open) closeMenu(); });
@@ -635,48 +741,68 @@ const QUESTIONS = [
   { label: "Einsteiger",      text: "Möchtest du eine Rasse, die besonders für Einsteiger geeignet ist (pflegeleicht, ausgeglichen)?" },
 ];
 
-/* ── BREED IMAGES ────────────────────────────────────────── */
+/* ── BREED IMAGES — jede Rasse hat ihr eigenes Bild ──────── */
 const BREED_IMG = {
-  "Maine-Coon-Katze":"assets/cat-maine-coon.webp","Norwegische Waldkatze":"assets/cat-maine-coon.webp",
-  "Sibirische Katze":"assets/cat-maine-coon.webp","Neva Masquarade":"assets/cat-maine-coon.webp",
-  "Türkisch Angora":"assets/cat-maine-coon.webp","Türkisch Van":"assets/cat-maine-coon.webp",
-  "Perserkatze":"assets/cat-perser.webp","Himalayakatze":"assets/cat-perser.webp",
-  "Exotic Shorthair":"assets/cat-perser.webp","Ragamuffin":"assets/cat-perser.webp",
-  "Britisch Kurzhaar":"assets/cat-bkh.webp","Britisch Langhaar":"assets/cat-bkh.webp",
-  "Kartäuser-Katze":"assets/cat-bkh.webp","Russisch Blau":"assets/cat-bkh.webp",
-  "Europäisch Kurzhaar":"assets/cat-bkh.webp","Deutsche Langhaarkatze":"assets/cat-bkh.webp",
-  "American Shorthair":"assets/cat-bkh.webp","Nebelung":"assets/cat-bkh.webp",
-  "Ragdoll":"assets/cat-ragdoll.webp","Heilige Birma":"assets/cat-ragdoll.webp",
-  "Siamkatze":"assets/cat-siam.webp","Orientalisch Kurzhaar":"assets/cat-siam.webp",
-  "Balinese":"assets/cat-siam.webp","Javanese":"assets/cat-siam.webp",
-  "Thaikatze":"assets/cat-siam.webp","Burma":"assets/cat-siam.webp",
-  "Tonkanese":"assets/cat-siam.webp","Bombay-Katze":"assets/cat-siam.webp",
-  "Bengalkatze":"assets/cat-bengal.webp","Savannah Katze":"assets/cat-bengal.webp",
-  "Ocicat":"assets/cat-bengal.webp","Toyger":"assets/cat-bengal.webp",
-  "Ägyptische Mau":"assets/cat-bengal.webp",
-  "Abessinier":"assets/cat-abessinier.webp","Falbkatze":"assets/cat-abessinier.webp",
-  "Somali-Katze":"assets/cat-abessinier.webp","Ceylonkatze":"assets/cat-abessinier.webp",
-  "Sphynx-Katze":"assets/cat-sphynx.webp","Don Sphynx":"assets/cat-sphynx.webp",
-  "Peterbald":"assets/cat-sphynx.webp","Cornish Rex":"assets/cat-sphynx.webp",
-  "Devon Rex":"assets/cat-sphynx.webp","German Rex":"assets/cat-sphynx.webp",
-  "Lykoi":"assets/cat-sphynx.webp",
-  // eigene Bilder für alle bisher fehlenden Rassen
-  "American Curl":"assets/cat-american-curl.webp",
-  "American Wirehair":"assets/cat-american-wirehair.webp",
-  "Burmilla":"assets/cat-burmilla.webp",
-  "Glückskatzen":"assets/cat-gluckskatzen.webp",
-  "Havana Katze":"assets/cat-havana.webp",
-  "Japanese Bobtail":"assets/cat-japanese-bobtail.webp",
-  "Khao Manee":"assets/cat-khao-manee.webp",
-  "Koratkatze":"assets/cat-korat.webp",
-  "Kurilen Bobtail":"assets/cat-kurilen-bobtail.webp",
-  "Manx":"assets/cat-manx.webp",
-  "Munchkin-Katze":"assets/cat-munchkin.webp",
-  "Pixiebob":"assets/cat-pixiebob.webp",
-  "Scottish Fold":"assets/cat-scottish-fold.webp",
-  "Selkirk Rex":"assets/cat-selkirk-rex.webp",
-  "Singapura":"assets/cat-singapura.webp",
-  "Tuxedo-Katzen":"assets/cat-tuxedo.webp",
+  "Abessinier":              "assets/cat-abessinier.webp",
+  "Ägyptische Mau":          "assets/cat-aegyptische-mau.webp",
+  "American Curl":           "assets/cat-american-curl.webp",
+  "American Shorthair":      "assets/cat-american-shorthair.webp",
+  "American Wirehair":       "assets/cat-american-wirehair.webp",
+  "Balinese":                "assets/cat-balinese.webp",
+  "Bengalkatze":             "assets/cat-bengal.webp",
+  "Bombay-Katze":            "assets/cat-bombay.webp",
+  "Britisch Kurzhaar":       "assets/cat-bkh.webp",
+  "Britisch Langhaar":       "assets/cat-britisch-langhaar.webp",
+  "Burma":                   "assets/cat-burma.webp",
+  "Burmilla":                "assets/cat-burmilla.webp",
+  "Ceylonkatze":             "assets/cat-ceylonkatze.webp",
+  "Cornish Rex":             "assets/cat-cornish-rex.webp",
+  "Deutsche Langhaarkatze":  "assets/cat-deutsche-langhaarkatze.webp",
+  "Devon Rex":               "assets/cat-devon-rex.webp",
+  "Don Sphynx":              "assets/cat-don-sphynx.webp",
+  "Europäisch Kurzhaar":     "assets/cat-europaeisch-kurzhaar.webp",
+  "Exotic Shorthair":        "assets/cat-exotic-shorthair.webp",
+  "Falbkatze":               "assets/cat-falbkatze.webp",
+  "German Rex":              "assets/cat-german-rex.webp",
+  "Glückskatzen":            "assets/cat-gluckskatzen.webp",
+  "Havana Katze":            "assets/cat-havana.webp",
+  "Heilige Birma":           "assets/cat-heilige-birma.webp",
+  "Himalayakatze":           "assets/cat-himalayakatze.webp",
+  "Japanese Bobtail":        "assets/cat-japanese-bobtail.webp",
+  "Javanese":                "assets/cat-javanese.webp",
+  "Kartäuser-Katze":         "assets/cat-kartaeuser.webp",
+  "Khao Manee":              "assets/cat-khao-manee.webp",
+  "Koratkatze":              "assets/cat-korat.webp",
+  "Kurilen Bobtail":         "assets/cat-kurilen-bobtail.webp",
+  "Lykoi":                   "assets/cat-lykoi.webp",
+  "Maine-Coon-Katze":        "assets/cat-maine-coon.webp",
+  "Manx":                    "assets/cat-manx.webp",
+  "Munchkin-Katze":          "assets/cat-munchkin.webp",
+  "Nebelung":                "assets/cat-nebelung.webp",
+  "Neva Masquarade":         "assets/cat-neva-masquarade.webp",
+  "Norwegische Waldkatze":   "assets/cat-norwaldkatze.webp",
+  "Ocicat":                  "assets/cat-ocicat.webp",
+  "Orientalisch Kurzhaar":   "assets/cat-orientalisch-kurzhaar.webp",
+  "Perserkatze":             "assets/cat-perser.webp",
+  "Peterbald":               "assets/cat-peterbald.webp",
+  "Pixiebob":                "assets/cat-pixiebob.webp",
+  "Ragamuffin":              "assets/cat-ragamuffin.webp",
+  "Ragdoll":                 "assets/cat-ragdoll.webp",
+  "Russisch Blau":           "assets/cat-russisch-blau.webp",
+  "Savannah Katze":          "assets/cat-savannah.webp",
+  "Scottish Fold":           "assets/cat-scottish-fold.webp",
+  "Selkirk Rex":             "assets/cat-selkirk-rex.webp",
+  "Siamkatze":               "assets/cat-siam.webp",
+  "Sibirische Katze":        "assets/cat-sibirische-katze.webp",
+  "Singapura":               "assets/cat-singapura.webp",
+  "Somali-Katze":            "assets/cat-somali.webp",
+  "Sphynx-Katze":            "assets/cat-sphynx.webp",
+  "Thaikatze":               "assets/cat-thaikatze.webp",
+  "Tonkanese":               "assets/cat-tonkanese.webp",
+  "Toyger":                  "assets/cat-toyger.webp",
+  "Türkisch Angora":         "assets/cat-tuerkisch-angora.webp",
+  "Türkisch Van":            "assets/cat-tuerkisch-van.webp",
+  "Tuxedo-Katzen":           "assets/cat-tuxedo.webp",
 };
 function breedImg(n) { return BREED_IMG[n] || "assets/cat-start.webp"; }
 
@@ -946,7 +1072,48 @@ function showGallery() {
   buildGalleryGrid();
   showScreen('screenGallery');
   window.scrollTo({ top: 0, behavior: 'instant' });
-  requestAnimationFrame(() => requestAnimationFrame(() => setupGalleryScroll()));
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    setupGalleryScroll();
+    autoScrollGallery();
+  }));
+}
+
+function autoScrollGallery() {
+  const outer = document.getElementById('galOuter');
+  if (!outer) return;
+
+  const winH   = window.innerHeight;
+  const outerH = outer.offsetHeight;
+  const total  = Math.max(1, outerH - winH);
+
+  // Target = point where rotateX reaches 0 (45% of progress) + tiny buffer
+  const outerTop  = outer.getBoundingClientRect().top + window.scrollY;
+  const targetY   = outerTop + total * 0.47;
+  const startY    = window.scrollY;
+  const dist      = targetY - startY;
+  const duration  = 2800; // ms — slow reveal feels cinematic
+  const startTime = performance.now();
+
+  let cancelled = false;
+
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function step(now) {
+    if (cancelled) return;
+    const t = Math.min((now - startTime) / duration, 1);
+    window.scrollTo(0, startY + dist * easeInOutCubic(t));
+    if (t < 1) requestAnimationFrame(step);
+  }
+
+  // Allow user to take over at any time
+  const cancel = () => { cancelled = true; };
+  window.addEventListener('wheel',      cancel, { passive: true, once: true });
+  window.addEventListener('touchstart', cancel, { passive: true, once: true });
+  window.addEventListener('keydown',    cancel, { once: true });
+
+  requestAnimationFrame(step);
 }
 
 function buildGalleryGrid() {
