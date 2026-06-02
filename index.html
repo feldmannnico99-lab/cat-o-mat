@@ -48,21 +48,28 @@
       pointer-events: none; z-index: 98;
     }
 
+    /* CSS Grid: zuverlässig 2 Spalten nebeneinander */
     .pill-list {
       list-style: none; padding: 0 32px;
-      display: flex; flex-wrap: wrap;
-      row-gap: 10px; width: 100%; max-width: 860px;
-      pointer-events: auto; justify-content: stretch;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%; max-width: 860px;
+      pointer-events: auto;
     }
 
     .pill-col {
-      flex: 0 0 50%;
       display: flex; justify-content: center; align-items: stretch;
       box-sizing: border-box; padding: 5px;
     }
 
-    /* 5th item (last) → center in last row */
-    .pill-col:nth-child(5):last-child { margin-left: 25%; }
+    /* 5. Item (Datenschutz) → volle Breite, zentriert */
+    .pill-col:nth-child(5):last-child {
+      grid-column: 1 / -1;
+      max-width: 50%;
+      margin: 0 auto;
+      width: 100%;
+    }
 
     .pill-link {
       width: 100%; min-height: 130px;
@@ -91,9 +98,9 @@
 
     @media (max-width: 699px) {
       .bubble-overlay { align-items: flex-start; padding-top: 100px; }
-      .pill-col { flex: 0 0 100%; margin-left: 0 !important; }
+      .pill-list { grid-template-columns: 1fr; }
+      .pill-col:nth-child(5):last-child { grid-column: 1; max-width: 100%; margin: 0; }
       .pill-link { font-size: clamp(1.2rem, 5vw, 2rem); min-height: 72px; }
-      .pill-col:nth-child(5):last-child { margin-left: 0 !important; }
       .pill-link:hover { background: #fff; color: #000; }
     }
 
@@ -245,8 +252,8 @@
       transform-origin: 50% 0%;
       transform-style: preserve-3d;
       will-change: transform;
-      /* initial state: tilted */
-      transform: rotateX(75deg) scale(1.2);
+      /* initial state: tilted + slightly smaller so no side-overflow */
+      transform: rotateX(75deg) scale(0.85);
     }
 
     /* GalleryCol */
@@ -1210,10 +1217,10 @@ function setupGalleryScroll() {
     const total    = Math.max(1, outerH - winH);
     const p        = Math.min(1, scrolled / total);
 
-    // rotateX: 75 → 0 über p 0 → 0.45
-    const rotX  = 75 * Math.max(0, 1 - p / 0.45);
-    // scale: 1.2 → 1 über p 0.45 → 0.75
-    const scale = 1.2 - 0.2 * Math.max(0, Math.min((p - 0.45) / 0.3, 1));
+    // rotateX: 75 → 0 und scale: 0.85 → 1.0 — beide synchron über p 0 → 0.45
+    const rp    = Math.min(p / 0.45, 1);
+    const rotX  = 75 * (1 - rp);
+    const scale = 0.85 + 0.15 * rp;          // startet klein → kein Überlauf
     grid.style.transform = `rotateX(${rotX}deg) scale(${scale})`;
 
     // Spalten-Parallax: jede Spalte bewegt sich leicht anders → Tiefeneffekt
