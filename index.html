@@ -1341,52 +1341,54 @@ document.addEventListener('mouseup',   () => document.documentElement.classList.
 
 /* ── VISITOR COUNTER ─────────────────────────────────────── */
 (function () {
-  const NS  = 'catoamt-visits-v2';
-  const DAY_NAMES = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  const NS       = 'catoamt-visits-v2';
+  const DAYS     = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  let todayCount = null; // gespeicherter Rückgabewert des /hit/ Aufrufs
 
-  function getKey(offsetDays) {
+  function dateKey(offset) {
     const d = new Date();
-    d.setDate(d.getDate() - offsetDays);
-    return d.toISOString().slice(0, 10); // YYYY-MM-DD
+    d.setDate(d.getDate() - offset);
+    return d.toISOString().slice(0, 10);
   }
 
-  function getDayLabel(offsetDays) {
+  function dayLabel(offset) {
     const d = new Date();
-    d.setDate(d.getDate() - offsetDays);
-    return DAY_NAMES[d.getDay()];
+    d.setDate(d.getDate() - offset);
+    return DAYS[d.getDay()];
   }
 
-  // Increment heutigen Zähler (einmal pro Browser-Session)
+  // Tracking beim Seitenaufruf — 1× pro Session
+  // Speichert den Return-Value (= echter aktueller Tages-Count)
   async function trackVisit() {
-    const todayKey = getKey(0);
-    const lastTracked = sessionStorage.getItem('catomat-tracked');
-    if (lastTracked === todayKey) return; // bereits in dieser Session gezählt
-    sessionStorage.setItem('catomat-tracked', todayKey);
+    const key  = dateKey(0);
+    if (sessionStorage.getItem('catomat-tracked') === key) return;
+    sessionStorage.setItem('catomat-tracked', key);
     try {
-      await fetch(`https://api.countapi.xyz/hit/${NS}/${todayKey}`);
-    } catch (_) { /* silent fail */ }
+      const r    = await fetch(`https://api.countapi.xyz/hit/${NS}/${key}`);
+      const data = await r.json();
+      todayCount = typeof data.value === 'number' ? data.value : null;
+    } catch (_) { /* API nicht erreichbar */ }
   }
 
-  // Letzte 7 Tage laden und anzeigen
   async function loadAndRender() {
     const barsEl  = document.getElementById('visitorBars');
     const totalEl = document.getElementById('visitorTotal');
     if (!barsEl) return;
 
-    // Zähle 7 Tage: Index 0 = heute, 6 = vor 6 Tagen
-    const days = Array.from({ length: 7 }, (_, i) => ({
-      key:   getKey(6 - i),       // ältester zuerst → neuester rechts
-      label: getDayLabel(6 - i),
-      isToday: (6 - i) === 0
+    // 7 Einträge: Index 0 = vor 6 Tagen, Index 6 = heute
+    const slots = Array.from({ length: 7 }, (_, i) => ({
+      key:     dateKey(6 - i),
+      label:   dayLabel(6 - i),
+      isToday: i === 6
     }));
 
-    let counts = [];
+    let counts;
     try {
       counts = await Promise.all(
-        days.map(d =>
-          fetch(`https://api.countapi.xyz/get/${NS}/${d.key}`)
+        slots.map(s =>
+          fetch(`https://api.countapi.xyz/get/${NS}/${s.key}`)
             .then(r => r.json())
-            .then(j => j.value || 0)
+            .then(j => (typeof j.value === 'number' ? j.value : 0))
             .catch(() => 0)
         )
       );
@@ -1394,34 +1396,38 @@ document.addEventListener('mouseup',   () => document.documentElement.classList.
       counts = new Array(7).fill(0);
     }
 
-    const maxCount = Math.max(...counts, 1); // avoid /0
-    const total7   = counts.reduce((a, b) => a + b, 0);
+    // Heutigen Wert aus dem /hit/-Response übernehmen, falls vorhanden
+    // → kein Race-Condition-Problem mehr
+    if (todayCount !== null) counts[6] = todayCount;
 
-    barsEl.innerHTML = days.map((d, i) => `
+    const max    = Math.max(...counts, 1);
+    const total7 = counts.reduce((a, b) => a + b, 0);
+
+    barsEl.innerHTML = slots.map((s, i) => `
       <div class="visitor-bar-col">
-        <div class="visitor-bar-fill ${d.isToday ? 'today' : 'past'}"
-             style="height: ${Math.max(2, Math.round((counts[i] / maxCount) * 64))}px"
+        <div class="visitor-bar-fill ${s.isToday ? 'today' : 'past'}"
+             style="height:${Math.max(2, Math.round(counts[i] / max * 64))}px"
              title="${counts[i]} Aufrufe"></div>
-        <div class="visitor-bar-label ${d.isToday ? 'today' : ''}">${d.label}</div>
+        <div class="visitor-bar-label ${s.isToday ? 'today' : ''}">${s.label}</div>
       </div>`).join('');
 
-    totalEl.innerHTML = `Gesamt letzte 7 Tage: <strong>${total7} Aufrufe</strong> &nbsp;·&nbsp; Heute (${days[6].label}): <strong>${counts[6]}</strong>`;
+    totalEl.innerHTML =
+      `Letzte 7 Tage gesamt: <strong>${total7}</strong>&nbsp;&nbsp;·&nbsp;&nbsp;` +
+      `Heute (${slots[6].label}): <strong>${counts[6]}</strong>`;
   }
 
-  // Auf jeder Seite tracken + nur im Datenschutz anzeigen
+  // Sofort beim Laden tracken
   trackVisit();
 
-  // Wenn Datenschutz-Screen sichtbar wird → laden
-  const origShowScreen = window.showScreen;
-  // MutationObserver auf screenDatenschutz
+  // Rendern sobald Datenschutz-Screen aktiv wird
   const obs = new MutationObserver(() => {
-    const screen = document.getElementById('screenDatenschutz');
-    if (screen && screen.classList.contains('active')) {
+    if (document.getElementById('screenDatenschutz')
+          ?.classList.contains('active')) {
       loadAndRender();
     }
   });
-  const target = document.getElementById('screenDatenschutz');
-  if (target) obs.observe(target, { attributes: true, attributeFilter: ['class'] });
+  const el = document.getElementById('screenDatenschutz');
+  if (el) obs.observe(el, { attributes: true, attributeFilter: ['class'] });
 })();
 </script>
 </body>
