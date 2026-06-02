@@ -10,7 +10,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --white: #ffffff; --black: #000000; }
+    :root { --white: #fff; --black: #000; --r: 16px; }
 
     html, body {
       background: var(--black);
@@ -21,113 +21,107 @@
 
     /* ── BUBBLE MENU ─────────────────────────────── */
     .bubble-menu {
-      left: 0; right: 0; top: 2em;
-      display: flex; align-items: center;
-      justify-content: space-between;
-      gap: 16px; padding: 0 2em;
-      pointer-events: none; z-index: 99;
+      right: 2em; top: 2em;
+      position: fixed;
+      z-index: 99;
+      pointer-events: none;
     }
-    .bubble-menu.fixed  { position: fixed; }
-    .bubble-menu .bubble {
-      --bubble-size: 48px;
-      width: var(--bubble-size); height: var(--bubble-size);
+
+    .menu-btn {
+      --sz: 52px;
+      width: var(--sz); height: var(--sz);
       border-radius: 50%;
       background: #000;
       border: 1.5px solid rgba(255,255,255,0.35);
-      display: inline-flex; align-items: center; justify-content: center;
-      pointer-events: auto;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      cursor: pointer; pointer-events: auto;
+      transition: border-color .2s;
     }
-    .bubble-menu .logo-bubble {
-      width: auto; min-height: var(--bubble-size); height: var(--bubble-size);
-      padding: 0 18px; border-radius: calc(var(--bubble-size) / 2); gap: 8px;
-    }
-    .bubble-menu .logo-content {
-      display: inline-flex; align-items: center; justify-content: center;
-      color: white; font-size: 15px; font-weight: 800; letter-spacing: -0.3px;
-      white-space: nowrap;
-    }
-    .bubble-menu .logo-content sup { font-size: 0.55em; vertical-align: super; }
-    .bubble-menu .menu-btn {
-      border: none; background: #000;
-      cursor: pointer; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; padding: 0;
-    }
-    .bubble-menu .menu-line {
+
+    .menu-btn:hover { border-color: rgba(255,255,255,0.7); }
+
+    .menu-line {
       width: 22px; height: 2px; background: white; border-radius: 2px;
-      display: block; margin: 0 auto;
-      transition: transform .3s ease, opacity .3s ease;
-      transform-origin: center;
+      display: block; transition: transform .3s ease, opacity .3s ease;
     }
-    .bubble-menu .menu-line + .menu-line { margin-top: 5px; }
-    .bubble-menu .menu-btn.open .menu-line:first-child { transform: translateY(3.5px) rotate(45deg); }
-    .bubble-menu .menu-btn.open .menu-line:last-child  { transform: translateY(-3.5px) rotate(-45deg); }
+
+    .menu-line + .menu-line { margin-top: 5px; }
+    .menu-btn.open .menu-line:first-child { transform: translateY(3.5px) rotate(45deg); }
+    .menu-btn.open .menu-line:last-child  { transform: translateY(-3.5px) rotate(-45deg); }
 
     /* ── BUBBLE MENU OVERLAY ─────────────────────── */
-    .bubble-menu-items {
-      inset: 0; display: flex;
-      align-items: center; justify-content: center;
+    .bubble-overlay {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.92);
       pointer-events: none; z-index: 98;
-      background: rgba(0,0,0,0.88);
     }
-    .bubble-menu-items.fixed { position: fixed; }
 
     .pill-list {
-      list-style: none; padding: 0 24px;
+      list-style: none; padding: 0 32px;
       display: flex; flex-wrap: wrap;
-      gap: 0; row-gap: 6px;
-      width: 100%; max-width: 900px;
+      row-gap: 10px; width: 100%; max-width: 860px;
       pointer-events: auto; justify-content: stretch;
     }
+
     .pill-col {
+      flex: 0 0 50%;
       display: flex; justify-content: center; align-items: stretch;
-      flex: 0 0 calc(100% / 2); box-sizing: border-box;
-      padding: 4px;
+      box-sizing: border-box; padding: 5px;
     }
+
+    /* 5th item (last) → center in last row */
+    .pill-col:nth-child(5):last-child { margin-left: 25%; }
+
     .pill-link {
-      --item-rot: 0deg;
-      width: 100%; min-height: 120px;
-      padding: clamp(1.2rem, 2.5vw, 3rem) 0;
-      font-size: clamp(1.6rem, 3.5vw, 3.5rem);
-      font-weight: 700; line-height: 0;
+      width: 100%; min-height: 130px;
+      padding: clamp(1rem, 2.5vw, 2.8rem) 0;
+      font-size: clamp(1.5rem, 3.5vw, 3.8rem);
+      font-weight: 800; line-height: 1;
       border-radius: 999px;
-      background: #000;
-      color: #fff;
-      border: 1.5px solid rgba(255,255,255,0.25);
+      background: #000; color: #fff;
+      border: 1.5px solid rgba(255,255,255,0.22);
       text-decoration: none;
       display: flex; align-items: center; justify-content: center;
-      position: relative;
-      transition: background .25s ease, color .25s ease, border-color .25s ease;
       will-change: transform;
-      box-sizing: border-box; white-space: nowrap; overflow: hidden;
+      transition: background .22s, color .22s, border-color .22s;
+      white-space: nowrap; overflow: hidden;
     }
-    .pill-label { display: inline-block; will-change: transform, opacity; height: 1.2em; line-height: 1.2; }
+
+    .pill-label { display: inline-block; will-change: transform, opacity; }
 
     @media (min-width: 700px) {
-      .pill-col { flex: 0 0 calc(100% / 2); }
-      .pill-link { transform: rotate(var(--item-rot)); min-height: 160px; }
+      .pill-link { transform: rotate(var(--rot, 0deg)); min-height: 160px; }
       .pill-link:hover {
-        transform: rotate(var(--item-rot)) scale(1.05);
+        transform: rotate(var(--rot, 0deg)) scale(1.04);
         background: #fff; color: #000; border-color: #fff;
       }
-      .pill-link:active { transform: rotate(var(--item-rot)) scale(0.95); }
-    }
-    @media (max-width: 699px) {
-      .bubble-menu-items { align-items: flex-start; padding-top: 110px; }
-      .pill-col { flex: 0 0 100%; margin-left: 0 !important; }
-      .pill-link { font-size: clamp(1.3rem, 5vw, 2rem); min-height: 80px; }
-      .pill-link:hover { background: #fff; color: #000; border-color: #fff; }
     }
 
-    /* ── LAYOUT ──────────────────────────────────── */
+    @media (max-width: 699px) {
+      .bubble-overlay { align-items: flex-start; padding-top: 100px; }
+      .pill-col { flex: 0 0 100%; margin-left: 0 !important; }
+      .pill-link { font-size: clamp(1.2rem, 5vw, 2rem); min-height: 72px; }
+      .pill-col:nth-child(5):last-child { margin-left: 0 !important; }
+      .pill-link:hover { background: #fff; color: #000; }
+    }
+
+    /* ── PAGE ────────────────────────────────────── */
     .page {
       min-height: 100vh; display: flex; flex-direction: column;
       align-items: center; padding: 0 20px 60px;
     }
+
     .spacer-top { height: 100px; width: 100%; flex-shrink: 0; }
 
-    /* ── TITLE ───────────────────────────────────── */
     .title-area { text-align: center; padding: 20px 0 40px; }
-    .main-title { font-size: clamp(60px, 11vw, 130px); font-weight: 900; line-height: 0.92; letter-spacing: -2px; }
+
+    .main-title {
+      font-size: clamp(60px, 11vw, 130px);
+      font-weight: 900; line-height: 0.92; letter-spacing: -2px;
+    }
+
     .main-subtitle { font-size: clamp(16px, 2.2vw, 22px); font-weight: 600; margin-top: 14px; }
 
     /* ── SCREENS ─────────────────────────────────── */
@@ -135,33 +129,44 @@
     .screen.active { display: block; animation: appear .22s ease both; }
 
     @keyframes appear {
-      from { opacity: 0; transform: translateY(6px); }
+      from { opacity: 0; transform: translateY(8px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── CARD ────────────────────────────────────── */
-    .card { border: 1.5px solid var(--white); background: var(--black); padding: 36px 44px 32px; position: relative; }
+    /* ── CARD (rounded) ──────────────────────────── */
+    .card {
+      border: 1.5px solid var(--white);
+      background: var(--black);
+      padding: 36px 44px 32px;
+      position: relative;
+      border-radius: var(--r);
+    }
+
+    /* speech-bubble tail — sharp triangle, anchors below rounded card */
     .card-tail {
-      position: absolute; bottom: -1px; left: 52px;
+      position: absolute;
+      bottom: calc(-1px - 18px);
+      left: 52px;
       width: 0; height: 0;
-      border-left: 13px solid transparent; border-right: 13px solid transparent;
-      border-top: 18px solid var(--white); transform: translateY(100%);
+      border-left:  13px solid transparent;
+      border-right: 13px solid transparent;
+      border-top:   18px solid var(--white);
     }
 
     /* ── START CARD ──────────────────────────────── */
-    .start-card { padding: 0; display: flex; align-items: stretch; }
+    .start-card { padding: 0; display: flex; align-items: stretch; overflow: hidden; }
     .start-card-body { flex: 1; padding: 36px 44px 32px; }
     .start-label { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 20px; opacity: 0.6; }
-    .start-text { font-size: clamp(18px, 2.5vw, 26px); font-weight: 500; line-height: 1.45; max-width: 620px; margin-bottom: 36px; }
-    .start-meta { display: flex; gap: 40px; margin-bottom: 36px; }
+    .start-text  { font-size: clamp(18px, 2.5vw, 26px); font-weight: 500; line-height: 1.45; max-width: 620px; margin-bottom: 36px; }
+    .start-meta  { display: flex; gap: 40px; margin-bottom: 36px; }
     .start-meta-item strong { display: block; font-size: 32px; font-weight: 800; }
     .start-meta-item span   { font-size: 13px; opacity: 0.55; font-weight: 500; }
     .start-card-img { width: 210px; flex-shrink: 0; border-left: 1.5px solid rgba(255,255,255,0.18); overflow: hidden; display: flex; align-items: flex-end; }
     .start-card-img img { width: 100%; display: block; filter: invert(1); }
 
-    /* ── QUESTION CARD ───────────────────────────── */
-    .q-header  { font-size: 14px; font-weight: 700; margin-bottom: 22px; }
-    .q-text    { font-size: clamp(18px, 2.8vw, 30px); font-weight: 500; line-height: 1.3; margin-bottom: 36px; max-width: 700px; }
+    /* ── QUESTION ────────────────────────────────── */
+    .q-header { font-size: 14px; font-weight: 700; margin-bottom: 22px; }
+    .q-text   { font-size: clamp(18px, 2.8vw, 30px); font-weight: 500; line-height: 1.3; margin-bottom: 36px; max-width: 700px; }
     .q-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
     .ans-group { display: flex; }
     .ans-btn {
@@ -194,7 +199,7 @@
     .top-match-img img { width: 100%; display: block; filter: invert(1); }
     .top-match-line { font-size: clamp(20px, 3vw, 32px); font-weight: 700; line-height: 1.2; margin-bottom: 10px; }
     .top-match-desc { font-size: 15px; font-weight: 400; opacity: 0.7; line-height: 1.6; max-width: 560px; }
-    .hinweis-box { margin: 16px 0 24px; padding: 12px 16px; border: 1px dashed rgba(255,255,255,0.5); font-size: 13px; font-weight: 600; opacity: 0.85; line-height: 1.5; display: none; }
+    .hinweis-box { margin: 16px 0 24px; padding: 12px 16px; border: 1px dashed rgba(255,255,255,0.5); font-size: 13px; font-weight: 600; opacity: 0.85; line-height: 1.5; display: none; border-radius: 8px; }
     .hinweis-box.visible { display: block; }
     .hinweis-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.6; margin-bottom: 4px; }
     .breed-row { display: grid; grid-template-columns: 220px 1fr 68px; gap: 14px 20px; align-items: center; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); }
@@ -204,18 +209,127 @@
     .breed-thumb img { width: 100%; height: 100%; object-fit: contain; filter: invert(1); display: block; }
     .breed-name { font-size: 14px; font-weight: 700; }
     .breed-tag  { font-size: 11px; opacity: 0.45; font-weight: 500; margin-top: 1px; }
-    .breed-note-tag { font-size: 10px; font-weight: 700; border: 1px solid rgba(255,255,255,0.4); padding: 1px 5px; margin-top: 3px; display: inline-block; letter-spacing: 0.3px; opacity: 0.7; }
+    .breed-note-tag { font-size: 10px; font-weight: 700; border: 1px solid rgba(255,255,255,0.4); padding: 1px 5px; margin-top: 3px; display: inline-block; letter-spacing: 0.3px; opacity: 0.7; border-radius: 3px; }
     .bar-track { height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
     .bar-fill  { height: 100%; background: white; border-radius: 2px; width: 0%; transition: width .9s cubic-bezier(0.22,1,0.36,1); }
     .bar-fill.dim { background: rgba(255,255,255,0.3); }
     .pct-label     { font-size: 17px; font-weight: 800; text-align: right; }
     .pct-label.dim { opacity: 0.35; }
 
+    /* ── GALLERY ─────────────────────────────────── */
+    .gallery-header { margin-bottom: 32px; }
+    .gallery-label  { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.6; margin-bottom: 8px; }
+    .gallery-title  { font-size: clamp(32px, 6vw, 72px); font-weight: 900; letter-spacing: -1px; line-height: 1; margin-bottom: 10px; }
+    .gallery-sub    { font-size: 15px; opacity: 0.6; font-weight: 400; }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+
+    .gallery-item {
+      position: relative;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      /* scroll animation initial state */
+      transform: perspective(700px) rotateX(14deg) scale(0.92) translateY(16px);
+      opacity: 0.3;
+      transition:
+        transform 0.75s cubic-bezier(0.22,1,0.36,1),
+        opacity   0.6s  ease,
+        border-color 0.2s;
+    }
+
+    .gallery-item.in-view {
+      transform: perspective(700px) rotateX(0deg) scale(1) translateY(0);
+      opacity: 1;
+    }
+
+    .gallery-item:hover { border-color: rgba(255,255,255,0.6); }
+
+    .gallery-item img {
+      width: 100%; display: block;
+      filter: invert(1);
+      transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+    }
+
+    .gallery-item:hover img { transform: scale(1.06); }
+
+    .gallery-name-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.88));
+      padding: 28px 14px 14px;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.22,1,0.36,1);
+    }
+
+    .gallery-item:hover .gallery-name-overlay { transform: translateY(0); }
+
+    .gallery-name-text {
+      font-size: 13px; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── BREED MODAL ─────────────────────────────── */
+    .breed-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 200;
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+
+    .breed-modal.visible { opacity: 1; }
+
+    .breed-modal-inner {
+      border: 1.5px solid var(--white);
+      border-radius: var(--r);
+      padding: 36px 36px 32px;
+      max-width: 480px; width: 100%;
+      background: var(--black);
+      position: relative;
+      animation: appear .25s ease both;
+    }
+
+    .breed-modal-close {
+      position: absolute; top: 16px; right: 18px;
+      background: none; border: none; color: white;
+      font-size: 28px; line-height: 1; cursor: pointer;
+      opacity: 0.6; font-family: inherit; transition: opacity .15s;
+    }
+    .breed-modal-close:hover { opacity: 1; }
+
+    .breed-modal-img { width: 100px; display: block; filter: invert(1); margin-bottom: 20px; }
+    .breed-modal-name { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
+    .breed-modal-desc { font-size: 15px; opacity: 0.72; line-height: 1.65; }
+
     /* ── BUTTONS ─────────────────────────────────── */
-    .btn-white { border: 1.5px solid white; background: black; color: white; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; padding: 12px 30px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background .15s, color .15s; }
+    .btn-white {
+      border: 1.5px solid white; background: black; color: white;
+      font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700;
+      padding: 12px 30px; cursor: pointer; border-radius: var(--r);
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: background .15s, color .15s;
+    }
     .btn-white:hover { background: white; color: black; }
-    .btn-white-filled { border: 1.5px solid white; background: white; color: black; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; padding: 12px 30px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background .15s, color .15s; }
+
+    .btn-white-filled {
+      border: 1.5px solid white; background: white; color: black;
+      font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700;
+      padding: 12px 30px; cursor: pointer; border-radius: var(--r);
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: background .15s, color .15s;
+    }
     .btn-white-filled:hover { background: black; color: white; }
+
     .card-footer { margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15); display: flex; gap: 12px; flex-wrap: wrap; }
 
     /* ── RESPONSIVE ──────────────────────────────── */
@@ -235,6 +349,8 @@
       .bar-track { display: none; }
       .dots-area { padding-left: 20px; }
       .card-tail { left: 20px; }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .gallery-title { font-size: 36px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -244,48 +360,58 @@
 </head>
 <body>
 
-<!-- ── BUBBLE MENU (fixed) ─────────────────────────────── -->
-<nav class="bubble-menu fixed" aria-label="Hauptnavigation">
-  <div class="bubble logo-bubble">
-    <span class="logo-content">Cat-o-mat<sup>®</sup></span>
-  </div>
-  <button class="bubble toggle-bubble menu-btn" id="menuBtn"
-          aria-label="Navigation öffnen" aria-pressed="false" type="button">
-    <span class="menu-line"></span>
-    <span class="menu-line"></span>
-  </button>
-</nav>
+<!-- ── BURGER BUTTON (fixed top-right) ───────────────────── -->
+<button class="menu-btn" id="menuBtn" aria-label="Navigation öffnen" aria-pressed="false" type="button">
+  <span class="menu-line"></span>
+  <span class="menu-line"></span>
+</button>
 
-<div id="bubbleMenuItems" class="bubble-menu-items fixed" aria-hidden="true" style="display:none">
-  <ul class="pill-list" role="menu" aria-label="Menü-Links">
-    <li role="none" class="pill-col">
-      <a role="menuitem" href="#" class="pill-link" id="menuStartseite"
-         style="--item-rot: -5deg" aria-label="Startseite">
+<!-- ── MENU OVERLAY ──────────────────────────────────────── -->
+<div id="bubbleOverlay" class="bubble-overlay" aria-hidden="true" style="display:none; pointer-events:none">
+  <ul class="pill-list" role="menu">
+    <li class="pill-col" role="none">
+      <a class="pill-link" id="menuStartseite" href="#" style="--rot:-5deg" aria-label="Startseite" role="menuitem">
         <span class="pill-label">Startseite</span>
       </a>
     </li>
-    <li role="none" class="pill-col">
-      <a role="menuitem" href="mailto:info@cat-o-mat.de" class="pill-link"
-         style="--item-rot: 5deg" aria-label="Kontakt">
+    <li class="pill-col" role="none">
+      <a class="pill-link" id="menuGallery" href="#" style="--rot:5deg" aria-label="Find my Buddy" role="menuitem">
+        <span class="pill-label">Find my Buddy</span>
+      </a>
+    </li>
+    <li class="pill-col" role="none">
+      <a class="pill-link" href="mailto:info@cat-o-mat.de" style="--rot:5deg" aria-label="Kontakt" role="menuitem">
         <span class="pill-label">Kontakt</span>
       </a>
     </li>
-    <li role="none" class="pill-col">
-      <a role="menuitem" href="#impressum" class="pill-link" id="menuImpressum"
-         style="--item-rot: 5deg" aria-label="Impressum">
+    <li class="pill-col" role="none">
+      <a class="pill-link" href="#impressum" style="--rot:-5deg" aria-label="Impressum" role="menuitem">
         <span class="pill-label">Impressum</span>
       </a>
     </li>
-    <li role="none" class="pill-col">
-      <a role="menuitem" href="#datenschutz" class="pill-link" id="menuDatenschutz"
-         style="--item-rot: -5deg" aria-label="Datenschutz">
+    <li class="pill-col" role="none">
+      <a class="pill-link" href="#datenschutz" style="--rot:5deg" aria-label="Datenschutz" role="menuitem">
         <span class="pill-label">Datenschutz</span>
       </a>
     </li>
   </ul>
 </div>
 
-<!-- ── PAGE ───────────────────────────────────────────── -->
+<!-- ── BREED MODAL ───────────────────────────────────────── -->
+<div id="breedModal" class="breed-modal">
+  <div class="breed-modal-inner">
+    <button class="breed-modal-close" onclick="closeBreedModal()" aria-label="Schließen">&times;</button>
+    <img id="modalImg" src="" alt="" class="breed-modal-img">
+    <div class="breed-modal-name" id="modalName"></div>
+    <div class="breed-modal-desc" id="modalDesc"></div>
+    <div class="hinweis-box" id="modalNoteBox">
+      <div class="hinweis-label">Wichtiger Hinweis</div>
+      <div id="modalNote"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PAGE ──────────────────────────────────────────────── -->
 <div class="page">
   <div class="spacer-top"></div>
 
@@ -300,9 +426,7 @@
       <div class="card-tail"></div>
       <div class="start-card-body">
         <div class="start-label">Willkommen</div>
-        <div class="start-text">
-          Beantworte 20 kurze Fragen zu deinen Wünschen und erfahre, welche von 58 Katzenrassen am besten zu dir passt.
-        </div>
+        <div class="start-text">Beantworte 20 kurze Fragen zu deinen Wünschen und erfahre, welche von 58 Katzenrassen am besten zu dir passt.</div>
         <div class="start-meta">
           <div class="start-meta-item"><strong>20</strong><span>Fragen</span></div>
           <div class="start-meta-item"><strong>58</strong><span>Rassen</span></div>
@@ -313,9 +437,7 @@
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div class="start-card-img">
-        <img src="assets/cat-start.webp" alt="" loading="lazy">
-      </div>
+      <div class="start-card-img"><img src="assets/cat-start.webp" alt="" loading="lazy"></div>
     </div>
     <div class="dots-area" id="startDots"></div>
   </div>
@@ -368,13 +490,29 @@
     <div class="dots-area" id="resultDots"></div>
   </div>
 
+  <!-- GALLERY -->
+  <div class="screen" id="screenGallery">
+    <div class="gallery-header">
+      <div class="gallery-label">Galerie</div>
+      <div class="gallery-title">Find my Buddy</div>
+      <div class="gallery-sub">Alle Katzenrassen auf einen Blick — hover für den Namen, klick für mehr Info</div>
+    </div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+    <div class="card-footer" style="border-top:1px solid rgba(255,255,255,0.15); margin-top:0; padding-top:20px;">
+      <button class="btn-white" onclick="restartQuiz()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8a6 6 0 1 1 1.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M2 12V8h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Zum Quiz
+      </button>
+    </div>
+  </div>
+
 </div><!-- .page -->
 
 <script>
 /* ── BUBBLE MENU ─────────────────────────────────────────── */
-(function() {
+(function () {
   const btn     = document.getElementById('menuBtn');
-  const overlay = document.getElementById('bubbleMenuItems');
+  const overlay = document.getElementById('bubbleOverlay');
   let open = false;
 
   function openMenu() {
@@ -382,78 +520,73 @@
     btn.classList.add('open');
     btn.setAttribute('aria-pressed', 'true');
     overlay.style.display = 'flex';
+    overlay.style.pointerEvents = 'auto';
     overlay.setAttribute('aria-hidden', 'false');
 
     const pills  = overlay.querySelectorAll('.pill-link');
     const labels = overlay.querySelectorAll('.pill-label');
-
     gsap.set(pills,  { scale: 0 });
     gsap.set(labels, { y: 28, autoAlpha: 0 });
-
     pills.forEach((pill, i) => {
-      gsap.to(pill,     { scale: 1, duration: 0.5, ease: 'back.out(1.5)', delay: i * 0.1 });
-      gsap.to(labels[i],{ y: 0, autoAlpha: 1, duration: 0.45, ease: 'power3.out', delay: i * 0.1 + 0.06 });
+      gsap.to(pill,     { scale: 1, duration: 0.5, ease: 'back.out(1.5)', delay: i * 0.09 });
+      gsap.to(labels[i],{ y: 0, autoAlpha: 1, duration: 0.45, ease: 'power3.out', delay: i * 0.09 + 0.06 });
     });
   }
 
-  function closeMenu() {
+  function closeMenu(cb) {
     open = false;
     btn.classList.remove('open');
     btn.setAttribute('aria-pressed', 'false');
     overlay.setAttribute('aria-hidden', 'true');
-
     const pills  = overlay.querySelectorAll('.pill-link');
     const labels = overlay.querySelectorAll('.pill-label');
-
     gsap.to(labels, { y: 28, autoAlpha: 0, duration: 0.18, ease: 'power3.in' });
     gsap.to(pills, {
       scale: 0, duration: 0.22, ease: 'power3.in',
-      onComplete: () => { overlay.style.display = 'none'; }
+      onComplete: () => {
+        overlay.style.display = 'none';
+        overlay.style.pointerEvents = 'none';
+        if (cb) cb();
+      }
     });
   }
 
   btn.addEventListener('click', () => open ? closeMenu() : openMenu());
 
-  // Startseite pill → restart quiz
-  document.getElementById('menuStartseite').addEventListener('click', (e) => {
-    e.preventDefault();
-    closeMenu();
-    setTimeout(() => restartQuiz(), 250);
+  document.getElementById('menuStartseite').addEventListener('click', e => {
+    e.preventDefault(); closeMenu(() => restartQuiz());
   });
 
-  // Close on overlay backdrop click
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeMenu();
+  document.getElementById('menuGallery').addEventListener('click', e => {
+    e.preventDefault(); closeMenu(() => showGallery());
   });
 
-  // Close on Escape
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && open) closeMenu();
-  });
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeMenu(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && open) closeMenu(); });
 })();
 
 /* ── QUESTIONS ───────────────────────────────────────────── */
 const QUESTIONS = [
-  { label: "Kuscheligkeit",    text: "Möchtest du, dass deine Katze gern kuschelt und auf dem Schoß liegt?" },
-  { label: "Ruhig",            text: "Möchtest du eher eine ruhige und gemütliche Katze (nicht sehr aktiv)?" },
-  { label: "Verspielt",        text: "Möchtest du eine Katze, die sehr verspielt und aktiv ist?" },
-  { label: "Kinder",           text: "Soll deine Katze kinderfreundlich und geduldig mit Kindern sein?" },
-  { label: "Haustiere",        text: "Soll deine Katze gut mit anderen Haustieren (Katzen/Hunde) verträglich sein?" },
-  { label: "Vokal",            text: "Ist dir wichtig, dass die Katze sehr gesprächig und vokal ist (viel miaut)?" },
-  { label: "Anhänglich",       text: "Soll deine Katze sehr anhänglich und menschenbezogen sein?" },
-  { label: "Pflegeleicht",     text: "Legst du Wert auf eine besonders pflegeleichte Rasse (wenig Fellpflege)?" },
-  { label: "Kletterfreude",    text: "Soll deine Katze viel Energie und Kletterfreude haben (aktiver Jagdtrieb)?" },
-  { label: "Intelligenz",      text: "Soll deine Katze besonders intelligent und leicht trainierbar sein?" },
-  { label: "Allergie",         text: "Legst du Wert auf eine hypoallergene oder haararme Rasse?" },
-  { label: "Bes. Aussehen",    text: "Ist dir ein ungewöhnliches Aussehen (z. B. gefaltete Ohren, kurzes Gesicht, kein Fell) wichtig?" },
-  { label: "Temperament",      text: "Soll die Katze ein langsames, gemütliches Temperament haben und wenig Stress bei Veränderungen?" },
-  { label: "Robustheit",       text: "Legst du Wert auf eine langlebige Rasse mit robuster Gesundheit?" },
-  { label: "Wohnungskatze",    text: "Planst du, die Katze hauptsächlich drinnen zu halten (Wohnungskatze)?" },
-  { label: "Leise",            text: "Soll die Katze wenig miauen und insgesamt leise sein?" },
-  { label: "Jagdinstinkt",     text: "Soll die Katze einen ausgeprägten Jagdinstinkt haben (Mäusefänger)?" },
-  { label: "Tierarztaufwand",  text: "Bist du bereit für häufigere tierärztliche Betreuung oder spezielle Gesundheitsprobleme?" },
-  { label: "Mit Fremden",      text: "Ist dir ein ausgeprägtes Sozialverhalten gegenüber Fremden und Gästen wichtig?" },
-  { label: "Einsteiger",       text: "Möchtest du eine Rasse, die besonders für Einsteiger geeignet ist (pflegeleicht, ausgeglichen)?" },
+  { label: "Kuscheligkeit",   text: "Möchtest du, dass deine Katze gern kuschelt und auf dem Schoß liegt?" },
+  { label: "Ruhig",           text: "Möchtest du eher eine ruhige und gemütliche Katze (nicht sehr aktiv)?" },
+  { label: "Verspielt",       text: "Möchtest du eine Katze, die sehr verspielt und aktiv ist?" },
+  { label: "Kinder",          text: "Soll deine Katze kinderfreundlich und geduldig mit Kindern sein?" },
+  { label: "Haustiere",       text: "Soll deine Katze gut mit anderen Haustieren (Katzen/Hunde) verträglich sein?" },
+  { label: "Vokal",           text: "Ist dir wichtig, dass die Katze sehr gesprächig und vokal ist (viel miaut)?" },
+  { label: "Anhänglich",      text: "Soll deine Katze sehr anhänglich und menschenbezogen sein?" },
+  { label: "Pflegeleicht",    text: "Legst du Wert auf eine besonders pflegeleichte Rasse (wenig Fellpflege)?" },
+  { label: "Kletterfreude",   text: "Soll deine Katze viel Energie und Kletterfreude haben (aktiver Jagdtrieb)?" },
+  { label: "Intelligenz",     text: "Soll deine Katze besonders intelligent und leicht trainierbar sein?" },
+  { label: "Allergie",        text: "Legst du Wert auf eine hypoallergene oder haararme Rasse?" },
+  { label: "Bes. Aussehen",   text: "Ist dir ein ungewöhnliches Aussehen (z. B. gefaltete Ohren, kurzes Gesicht, kein Fell) wichtig?" },
+  { label: "Temperament",     text: "Soll die Katze ein langsames, gemütliches Temperament haben und wenig Stress bei Veränderungen?" },
+  { label: "Robustheit",      text: "Legst du Wert auf eine langlebige Rasse mit robuster Gesundheit?" },
+  { label: "Wohnungskatze",   text: "Planst du, die Katze hauptsächlich drinnen zu halten (Wohnungskatze)?" },
+  { label: "Leise",           text: "Soll die Katze wenig miauen und insgesamt leise sein?" },
+  { label: "Jagdinstinkt",    text: "Soll die Katze einen ausgeprägten Jagdinstinkt haben (Mäusefänger)?" },
+  { label: "Tierarztaufwand", text: "Bist du bereit für häufigere tierärztliche Betreuung oder spezielle Gesundheitsprobleme?" },
+  { label: "Mit Fremden",     text: "Ist dir ein ausgeprägtes Sozialverhalten gegenüber Fremden und Gästen wichtig?" },
+  { label: "Einsteiger",      text: "Möchtest du eine Rasse, die besonders für Einsteiger geeignet ist (pflegeleicht, ausgeglichen)?" },
 ];
 
 /* ── BREED IMAGES ────────────────────────────────────────── */
@@ -484,7 +617,22 @@ const BREED_IMG = {
 };
 function breedImg(n) { return BREED_IMG[n] || "assets/cat-start.webp"; }
 
-/* ── BREEDS (58) — ideal[i]: A=2 B=1 C=0 ────────────────── */
+/* ── GALLERY ITEMS (9 images → breed names) ─────────────── */
+const GALLERY_ITEMS = [
+  { img: "assets/cat-maine-coon.webp", breed: "Maine-Coon-Katze" },
+  { img: "assets/cat-perser.webp",     breed: "Perserkatze" },
+  { img: "assets/cat-bkh.webp",        breed: "Britisch Kurzhaar" },
+  { img: "assets/cat-siam.webp",       breed: "Siamkatze" },
+  { img: "assets/cat-bengal.webp",     breed: "Bengalkatze" },
+  { img: "assets/cat-ragdoll.webp",    breed: "Ragdoll" },
+  { img: "assets/cat-abessinier.webp", breed: "Abessinier" },
+  { img: "assets/cat-sphynx.webp",     breed: "Sphynx-Katze" },
+  { img: "assets/cat-start.webp",      breed: null,
+    label: "Deine Traumkatze",
+    desc: "Beantworte 20 Fragen und entdecke, welche der 58 Rassen am besten zu deinem Leben passt." },
+];
+
+/* ── BREEDS (58) ─────────────────────────────────────────── */
 const BREEDS = [
   {name:"Abessinier",desc:"Schlanke Athleten mit unersättlicher Neugier — immer in Bewegung, ideal für aktive Menschen.",note:null,
    ideal:[1,0,2,2,1,0,1,1,2,2,0,0,0,2,2,0,2,0,1,2]},
@@ -558,7 +706,7 @@ const BREEDS = [
    note:"Leiden manchmal zuchtbedingt unter Gesundheitsproblemen (z. B. Wirbel- und Schwanzanomalien, Manx-Syndrom). Tierärztliche Vorsorge empfohlen.",
    ideal:[1,1,2,2,1,0,1,1,2,2,0,0,1,2,2,0,1,0,1,2]},
   {name:"Munchkin-Katze",desc:"Kurzbeinige Rassekatze mit lebhaftem Wesen — herzerwärmend, aber ethisch umstritten.",
-   note:"Chondrodysplasie (zuchtbedingt kurze Beine) kann zu Gelenkproblemen führen. Die Zucht ist in einigen Ländern aus Tierschutzgründen umstritten.",
+   note:"Chondrodysplasie (zuchtbedingt kurze Beine) kann zu Gelenkproblemen führen. In einigen Ländern aus Tierschutzgründen umstritten.",
    ideal:[1,1,2,2,1,0,1,1,2,1,0,1,0,2,2,0,1,0,1,1]},
   {name:"Nebelung",desc:"Scheue Rasse mit seidigem Blaugrau-Fell — sanft, treu und ideal für ruhige Haushalte.",note:null,
    ideal:[1,2,1,2,1,0,1,2,1,2,0,0,2,2,2,0,1,0,1,2]},
@@ -571,7 +719,7 @@ const BREEDS = [
   {name:"Orientalisch Kurzhaar",desc:"Die extremste Variante der Siamese — noch spitzer, noch lauter, noch anhänglicher.",note:null,
    ideal:[0,0,2,0,1,2,2,1,2,1,0,0,0,2,2,0,2,0,1,0]},
   {name:"Perserkatze",desc:"Königin der Gemütlichkeit — luxuriöses Fell und sanftes Wesen, braucht tägliche Pflege.",
-   note:"Brachycephale Rasse: Das flache Gesicht kann zu Atemproblemen führen. Regelmäßige tierärztliche Kontrolle ist empfohlen.",
+   note:"Brachycephale Rasse: Das flache Gesicht kann zu Atemproblemen führen. Regelmäßige tierärztliche Kontrolle empfohlen.",
    ideal:[2,2,1,2,1,0,1,2,0,2,0,0,2,2,2,0,1,2,2,2]},
   {name:"Peterbald",desc:"Russische Haarlosigkeit auf schlankem Orientalischen Körper — aktiv, sozial und pflegebedürftig.",note:null,
    ideal:[1,0,2,2,1,0,1,1,2,1,1,1,0,2,2,0,1,1,1,1]},
@@ -587,7 +735,7 @@ const BREEDS = [
    note:"In vielen Kommunen ist die Haltung genehmigungspflichtig (je nach F-Generation). Bitte unbedingt beim zuständigen Veterinäramt anfragen.",
    ideal:[0,0,2,0,1,0,1,1,2,2,0,2,0,2,2,0,2,0,1,0]},
   {name:"Scottish Fold",desc:"Owl-Ohren und sanftes Wesen — aber zuchtbedingte Gelenkprobleme sind ein ernstes Thema.",
-   note:"Osteochondrodysplasie: Die Genmutation, die gefaltete Ohren erzeugt, verursacht gleichzeitig schmerzhafte Knorpel- und Gelenkerkrankungen. Ethisch umstritten.",
+   note:"Osteochondrodysplasie: Die Genmutation, die gefaltete Ohren erzeugt, verursacht schmerzhafte Knorpel- und Gelenkerkrankungen. Ethisch umstritten.",
    ideal:[1,1,2,2,1,0,1,1,2,1,0,0,1,2,2,0,1,0,1,1]},
   {name:"Selkirk Rex",desc:"Lockiges Plüschfell und entspannter Charakter — gesellig, sanft und pflegeleicht im Umgang.",note:null,
    ideal:[1,1,2,2,1,0,1,1,2,1,0,0,1,2,2,0,1,0,1,1]},
@@ -595,7 +743,7 @@ const BREEDS = [
    ideal:[0,0,2,0,1,2,2,1,2,1,0,0,0,2,2,0,2,0,1,0]},
   {name:"Sibirische Katze",desc:"Kräftige, natürliche Rasse — aktiv, sanft, familientauglich und möglicherweise hypoallergen.",note:null,
    ideal:[1,2,1,2,1,0,1,2,1,2,1,0,2,2,2,0,1,0,1,2]},
-  {name:"Singapura",desc:"Kleinste anerkannte Rasse — aber groß in Neugier und Energie. Zart, aktiv und verschmust.",note:null,
+  {name:"Singapura",desc:"Kleinste anerkannte Rasse — groß in Neugier und Energie. Zart, aktiv und verschmust.",note:null,
    ideal:[1,1,2,2,1,0,1,1,2,2,0,0,0,2,2,0,1,0,1,2]},
   {name:"Somali-Katze",desc:"Langhaarvariante des Abessiniers — lebhaft, neugierig und immer in Bewegung.",note:null,
    ideal:[0,0,2,2,1,0,1,1,2,2,0,0,0,2,2,0,2,0,1,2]},
@@ -618,23 +766,16 @@ const BREEDS = [
 ];
 
 /* ── STATE ───────────────────────────────────────────────── */
-let currentQ = 0;
-let answers  = {};
+let currentQ = 0, answers = {};
 
 /* ── INIT DOTS ───────────────────────────────────────────── */
-(function() {
+(function () {
   const n = QUESTIONS.length;
-  ['startDots','resultDots'].forEach((id, ri) => {
-    const area = document.getElementById(id);
-    for (let i = 0; i < n; i++) {
-      const d = document.createElement('div');
-      d.className = ri === 0 ? 'dot upcoming' : 'dot done';
-      area.appendChild(d);
-    }
-  });
+  document.getElementById('startDots').innerHTML  = Array(n).fill('<div class="dot upcoming"></div>').join('');
+  document.getElementById('resultDots').innerHTML = Array(n).fill('<div class="dot done"></div>').join('');
 })();
 
-/* ── HELPERS ─────────────────────────────────────────────── */
+/* ── SCREEN SWITCH ───────────────────────────────────────── */
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
   const el = document.getElementById(id);
@@ -645,8 +786,7 @@ function showScreen(id) {
 /* ── QUIZ ────────────────────────────────────────────────── */
 function startQuiz() {
   currentQ = 0; answers = {};
-  renderQuestion();
-  showScreen('screenQuestion');
+  renderQuestion(); showScreen('screenQuestion');
 }
 
 function renderQuestion() {
@@ -668,12 +808,10 @@ function renderDots() {
     const d = document.createElement('div');
     d.className = i < currentQ ? 'dot done' : i === currentQ ? 'dot active' : 'dot upcoming';
     const qi = i;
-    d.addEventListener('click', () => { if (qi <= currentQ || answers[qi] !== undefined) goToQuestion(qi); });
+    d.addEventListener('click', () => { if (qi <= currentQ || answers[qi] !== undefined) { currentQ = qi; renderQuestion(); } });
     area.appendChild(d);
   }
 }
-
-function goToQuestion(i) { currentQ = i; renderQuestion(); }
 
 function selectAnswer(val) {
   answers[currentQ] = val;
@@ -700,12 +838,9 @@ function computeMatches() {
   const n = QUESTIONS.length;
   return BREEDS.map(b => {
     let dist = 0;
-    for (let i = 0; i < n; i++) {
-      const u = (answers[i] !== undefined && answers[i] !== null) ? answers[i] : 1;
-      dist += Math.abs(u - b.ideal[i]);
-    }
-    return { ...b, pct: Math.round((1 - dist / (n*2)) * 100) };
-  }).sort((a,b) => b.pct - a.pct);
+    for (let i = 0; i < n; i++) dist += Math.abs(((answers[i]??null)!==null?answers[i]:1) - b.ideal[i]);
+    return { ...b, pct: Math.round((1 - dist/(n*2))*100) };
+  }).sort((a,b) => b.pct-a.pct);
 }
 
 function showResults() {
@@ -714,10 +849,8 @@ function showResults() {
   document.getElementById('topMatchDesc').textContent = top.desc;
   document.getElementById('topMatchImg').src = breedImg(top.name);
   document.getElementById('topMatchImg').alt = top.name;
-
-  const box = document.getElementById('hinweisBox');
   document.getElementById('hinweisText').textContent = top.note || '';
-  box.classList.toggle('visible', !!top.note);
+  document.getElementById('hinweisBox').classList.toggle('visible', !!top.note);
 
   const list = document.getElementById('breedList');
   list.innerHTML = ranked.map((r,i) => `
@@ -727,12 +860,10 @@ function showResults() {
         <div>
           <div class="breed-name">${r.name}</div>
           <div class="breed-tag">${r.desc.slice(0,50)}…</div>
-          ${r.note ? '<div class="breed-note-tag">Hinweis</div>' : ''}
+          ${r.note?'<div class="breed-note-tag">Hinweis</div>':''}
         </div>
       </div>
-      <div class="bar-track">
-        <div class="bar-fill ${i>4?'dim':''}" data-w="${r.pct}"></div>
-      </div>
+      <div class="bar-track"><div class="bar-fill ${i>4?'dim':''}" data-w="${r.pct}"></div></div>
       <div class="pct-label ${i>4?'dim':''}">${r.pct}%</div>
     </div>`).join('');
 
@@ -740,10 +871,76 @@ function showResults() {
   requestAnimationFrame(() => requestAnimationFrame(() => {
     list.querySelectorAll('.bar-fill').forEach((bar,i) => {
       bar.style.transitionDelay = `${i*28}ms`;
-      bar.style.width = bar.dataset.w + '%';
+      bar.style.width = bar.dataset.w+'%';
     });
   }));
 }
+
+/* ── GALLERY ─────────────────────────────────────────────── */
+function showGallery() {
+  const grid = document.getElementById('galleryGrid');
+  grid.innerHTML = '';
+
+  GALLERY_ITEMS.forEach((item, idx) => {
+    const breed = item.breed ? BREEDS.find(b => b.name === item.breed) : null;
+    const label = breed ? breed.name : (item.label || '');
+    const desc  = breed ? breed.desc : (item.desc || '');
+
+    const el = document.createElement('div');
+    el.className = 'gallery-item';
+    el.style.transitionDelay = `${(idx % 3) * 0.08}s`;
+    el.innerHTML = `
+      <img src="${item.img}" alt="${label}" loading="lazy">
+      <div class="gallery-name-overlay">
+        <div class="gallery-name-text">${label}</div>
+      </div>`;
+
+    if (breed || item.desc) {
+      el.addEventListener('click', () => openBreedModal({ name: label, desc, note: breed?.note || null, img: item.img }));
+    }
+
+    grid.appendChild(el);
+  });
+
+  showScreen('screenGallery');
+
+  // IntersectionObserver — rotateX scroll reveal
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in-view'); obs.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+
+  requestAnimationFrame(() => {
+    grid.querySelectorAll('.gallery-item').forEach(el => obs.observe(el));
+  });
+}
+
+function openBreedModal({ name, desc, note, img }) {
+  document.getElementById('modalImg').src  = img;
+  document.getElementById('modalImg').alt  = name;
+  document.getElementById('modalName').textContent = name;
+  document.getElementById('modalDesc').textContent = desc;
+  document.getElementById('modalNote').textContent = note || '';
+  document.getElementById('modalNoteBox').classList.toggle('visible', !!note);
+
+  const modal = document.getElementById('breedModal');
+  modal.style.display = 'flex';
+  requestAnimationFrame(() => modal.classList.add('visible'));
+}
+
+function closeBreedModal() {
+  const modal = document.getElementById('breedModal');
+  modal.classList.remove('visible');
+  setTimeout(() => { modal.style.display = 'none'; }, 200);
+}
+
+// Close modal on backdrop click
+document.getElementById('breedModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('breedModal')) closeBreedModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeBreedModal();
+});
 </script>
 </body>
 </html>
