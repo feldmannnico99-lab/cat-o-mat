@@ -7,14 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --white: #ffffff;
-      --black: #000000;
-      --gray:  rgba(255,255,255,0.35);
-    }
+    :root { --white: #ffffff; --black: #000000; }
 
     html, body {
       background: var(--black);
@@ -23,58 +19,116 @@
       min-height: 100vh;
     }
 
-    /* ── LAYOUT ─────────────────────────────────── */
-    .page {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 20px 60px;
+    /* ── BUBBLE MENU ─────────────────────────────── */
+    .bubble-menu {
+      left: 0; right: 0; top: 2em;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      gap: 16px; padding: 0 2em;
+      pointer-events: none; z-index: 99;
     }
-
-    /* ── HEADER ─────────────────────────────────── */
-    .topbar {
-      width: 100%;
-      max-width: 1100px;
-      display: flex;
-      justify-content: flex-end;
-      padding: 28px 0 0;
+    .bubble-menu.fixed  { position: fixed; }
+    .bubble-menu .bubble {
+      --bubble-size: 48px;
+      width: var(--bubble-size); height: var(--bubble-size);
+      border-radius: 50%;
+      background: #000;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      display: inline-flex; align-items: center; justify-content: center;
+      pointer-events: auto;
     }
+    .bubble-menu .logo-bubble {
+      width: auto; min-height: var(--bubble-size); height: var(--bubble-size);
+      padding: 0 18px; border-radius: calc(var(--bubble-size) / 2); gap: 8px;
+    }
+    .bubble-menu .logo-content {
+      display: inline-flex; align-items: center; justify-content: center;
+      color: white; font-size: 15px; font-weight: 800; letter-spacing: -0.3px;
+      white-space: nowrap;
+    }
+    .bubble-menu .logo-content sup { font-size: 0.55em; vertical-align: super; }
+    .bubble-menu .menu-btn {
+      border: none; background: #000;
+      cursor: pointer; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 0;
+    }
+    .bubble-menu .menu-line {
+      width: 22px; height: 2px; background: white; border-radius: 2px;
+      display: block; margin: 0 auto;
+      transition: transform .3s ease, opacity .3s ease;
+      transform-origin: center;
+    }
+    .bubble-menu .menu-line + .menu-line { margin-top: 5px; }
+    .bubble-menu .menu-btn.open .menu-line:first-child { transform: translateY(3.5px) rotate(45deg); }
+    .bubble-menu .menu-btn.open .menu-line:last-child  { transform: translateY(-3.5px) rotate(-45deg); }
 
-    .burger {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      cursor: pointer;
+    /* ── BUBBLE MENU OVERLAY ─────────────────────── */
+    .bubble-menu-items {
+      inset: 0; display: flex;
+      align-items: center; justify-content: center;
+      pointer-events: none; z-index: 98;
+      background: rgba(0,0,0,0.88);
+    }
+    .bubble-menu-items.fixed { position: fixed; }
+
+    .pill-list {
+      list-style: none; padding: 0 24px;
+      display: flex; flex-wrap: wrap;
+      gap: 0; row-gap: 6px;
+      width: 100%; max-width: 900px;
+      pointer-events: auto; justify-content: stretch;
+    }
+    .pill-col {
+      display: flex; justify-content: center; align-items: stretch;
+      flex: 0 0 calc(100% / 2); box-sizing: border-box;
       padding: 4px;
     }
+    .pill-link {
+      --item-rot: 0deg;
+      width: 100%; min-height: 120px;
+      padding: clamp(1.2rem, 2.5vw, 3rem) 0;
+      font-size: clamp(1.6rem, 3.5vw, 3.5rem);
+      font-weight: 700; line-height: 0;
+      border-radius: 999px;
+      background: #000;
+      color: #fff;
+      border: 1.5px solid rgba(255,255,255,0.25);
+      text-decoration: none;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      transition: background .25s ease, color .25s ease, border-color .25s ease;
+      will-change: transform;
+      box-sizing: border-box; white-space: nowrap; overflow: hidden;
+    }
+    .pill-label { display: inline-block; will-change: transform, opacity; height: 1.2em; line-height: 1.2; }
 
-    .burger span {
-      display: block;
-      width: 28px;
-      height: 2px;
-      background: white;
+    @media (min-width: 700px) {
+      .pill-col { flex: 0 0 calc(100% / 2); }
+      .pill-link { transform: rotate(var(--item-rot)); min-height: 160px; }
+      .pill-link:hover {
+        transform: rotate(var(--item-rot)) scale(1.05);
+        background: #fff; color: #000; border-color: #fff;
+      }
+      .pill-link:active { transform: rotate(var(--item-rot)) scale(0.95); }
+    }
+    @media (max-width: 699px) {
+      .bubble-menu-items { align-items: flex-start; padding-top: 110px; }
+      .pill-col { flex: 0 0 100%; margin-left: 0 !important; }
+      .pill-link { font-size: clamp(1.3rem, 5vw, 2rem); min-height: 80px; }
+      .pill-link:hover { background: #fff; color: #000; border-color: #fff; }
     }
 
-    /* ── TITLE AREA ──────────────────────────────── */
-    .title-area {
-      text-align: center;
-      padding: 32px 0 40px;
+    /* ── LAYOUT ──────────────────────────────────── */
+    .page {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; padding: 0 20px 60px;
     }
+    .spacer-top { height: 100px; width: 100%; flex-shrink: 0; }
 
-    .main-title {
-      font-size: clamp(60px, 11vw, 130px);
-      font-weight: 900;
-      line-height: 0.92;
-      letter-spacing: -2px;
-    }
-
-    .main-subtitle {
-      font-size: clamp(16px, 2.2vw, 22px);
-      font-weight: 600;
-      margin-top: 14px;
-      letter-spacing: 0.1px;
-    }
+    /* ── TITLE ───────────────────────────────────── */
+    .title-area { text-align: center; padding: 20px 0 40px; }
+    .main-title { font-size: clamp(60px, 11vw, 130px); font-weight: 900; line-height: 0.92; letter-spacing: -2px; }
+    .main-subtitle { font-size: clamp(16px, 2.2vw, 22px); font-weight: 600; margin-top: 14px; }
 
     /* ── SCREENS ─────────────────────────────────── */
     .screen { display: none; width: 100%; max-width: 1000px; }
@@ -86,442 +140,191 @@
     }
 
     /* ── CARD ────────────────────────────────────── */
-    .card {
-      border: 1.5px solid var(--white);
-      background: var(--black);
-      padding: 36px 44px 32px;
-      position: relative;
-    }
-
-    /* speech bubble tail */
+    .card { border: 1.5px solid var(--white); background: var(--black); padding: 36px 44px 32px; position: relative; }
     .card-tail {
-      position: absolute;
-      bottom: -1px;
-      left: 52px;
-      width: 0;
-      height: 0;
-      border-left: 13px solid transparent;
-      border-right: 13px solid transparent;
-      border-top: 18px solid var(--white);
-      transform: translateY(100%);
+      position: absolute; bottom: -1px; left: 52px;
+      width: 0; height: 0;
+      border-left: 13px solid transparent; border-right: 13px solid transparent;
+      border-top: 18px solid var(--white); transform: translateY(100%);
     }
 
     /* ── START CARD ──────────────────────────────── */
-    .start-label {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      margin-bottom: 20px;
-      opacity: 0.6;
-    }
-
-    .start-text {
-      font-size: clamp(18px, 2.5vw, 26px);
-      font-weight: 500;
-      line-height: 1.45;
-      max-width: 620px;
-      margin-bottom: 36px;
-    }
-
-    .start-meta {
-      display: flex;
-      gap: 40px;
-      margin-bottom: 36px;
-    }
-
-    .start-meta-item strong {
-      display: block;
-      font-size: 32px;
-      font-weight: 800;
-    }
-
-    .start-meta-item span {
-      font-size: 13px;
-      opacity: 0.55;
-      font-weight: 500;
-    }
+    .start-card { padding: 0; display: flex; align-items: stretch; }
+    .start-card-body { flex: 1; padding: 36px 44px 32px; }
+    .start-label { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 20px; opacity: 0.6; }
+    .start-text { font-size: clamp(18px, 2.5vw, 26px); font-weight: 500; line-height: 1.45; max-width: 620px; margin-bottom: 36px; }
+    .start-meta { display: flex; gap: 40px; margin-bottom: 36px; }
+    .start-meta-item strong { display: block; font-size: 32px; font-weight: 800; }
+    .start-meta-item span   { font-size: 13px; opacity: 0.55; font-weight: 500; }
+    .start-card-img { width: 210px; flex-shrink: 0; border-left: 1.5px solid rgba(255,255,255,0.18); overflow: hidden; display: flex; align-items: flex-end; }
+    .start-card-img img { width: 100%; display: block; filter: invert(1); }
 
     /* ── QUESTION CARD ───────────────────────────── */
-    .q-header {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 22px;
-      letter-spacing: 0.1px;
-    }
-
-    .q-text {
-      font-size: clamp(20px, 3vw, 32px);
-      font-weight: 500;
-      line-height: 1.3;
-      margin-bottom: 36px;
-      max-width: 700px;
-    }
-
-    .q-actions {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .ans-group {
-      display: flex;
-      gap: 0;
-    }
-
+    .q-header  { font-size: 14px; font-weight: 700; margin-bottom: 22px; }
+    .q-text    { font-size: clamp(18px, 2.8vw, 30px); font-weight: 500; line-height: 1.3; margin-bottom: 36px; max-width: 700px; }
+    .q-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .ans-group { display: flex; }
     .ans-btn {
-      border: 1.5px solid var(--white);
-      background: var(--black);
-      color: var(--white);
-      padding: 11px 26px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .12s, color .12s;
-      margin-right: -1.5px; /* collapse borders */
-      position: relative;
+      border: 1.5px solid var(--white); background: var(--black); color: var(--white);
+      padding: 11px 26px; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: background .12s, color .12s; margin-right: -1.5px; position: relative;
     }
-
-    .ans-btn:first-child { border-radius: 0; }
-    .ans-btn:last-child  { margin-right: 0; }
-
-    .ans-btn:hover {
-      background: rgba(255,255,255,0.1);
-      z-index: 1;
-    }
-
-    .ans-btn.sel {
-      background: var(--white);
-      color: var(--black);
-      z-index: 2;
-    }
-
+    .ans-btn:last-child { margin-right: 0; }
+    .ans-btn:hover { background: rgba(255,255,255,0.1); z-index: 1; }
+    .ans-btn.sel   { background: var(--white); color: var(--black); z-index: 2; }
     .skip-btn {
-      background: none;
-      border: none;
-      color: var(--white);
-      font-family: 'Outfit', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      opacity: 0.7;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: opacity .15s;
-      white-space: nowrap;
+      background: none; border: none; color: var(--white);
+      font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600;
+      cursor: pointer; opacity: 0.7; display: flex; align-items: center; gap: 6px;
+      transition: opacity .15s; white-space: nowrap;
     }
-
     .skip-btn:hover { opacity: 1; }
 
-    /* ── DOT NAVIGATION ──────────────────────────── */
-    .dots-area {
-      margin-top: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 6px;
-      padding-left: 52px; /* align tail with first dot */
-    }
-
-    .dot {
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all .18s ease;
-      flex-shrink: 0;
-    }
-
+    /* ── DOTS ────────────────────────────────────── */
+    .dots-area { margin-top: 40px; display: flex; align-items: center; gap: 5px; padding-left: 52px; flex-wrap: wrap; }
+    .dot { border-radius: 50%; cursor: pointer; transition: all .18s ease; flex-shrink: 0; }
     .dot.done    { width: 9px;  height: 9px;  background: rgba(255,255,255,0.55); }
     .dot.active  { width: 14px; height: 14px; border: 2px solid white; background: transparent; }
-    .dot.upcoming{ width: 9px;  height: 9px;  background: rgba(255,255,255,0.2); }
-
-    /* ── CAT IMAGES ─────────────────────────────── */
-    .cat-img {
-      display: block;
-      filter: invert(1);
-    }
-
-    /* Start card split layout */
-    .start-card {
-      padding: 0;
-      display: flex;
-      align-items: stretch;
-    }
-
-    .start-card-body {
-      flex: 1;
-      padding: 36px 44px 32px;
-    }
-
-    .start-card-img {
-      width: 210px;
-      flex-shrink: 0;
-      border-left: 1.5px solid rgba(255,255,255,0.18);
-      overflow: hidden;
-      display: flex;
-      align-items: flex-end;
-    }
-
-    .start-card-img img {
-      width: 100%;
-      display: block;
-      filter: invert(1);
-    }
+    .dot.upcoming{ width: 9px;  height: 9px;  background: rgba(255,255,255,0.18); }
 
     /* ── RESULTS ─────────────────────────────────── */
-    .results-label {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      margin-bottom: 20px;
-      opacity: 0.6;
-    }
-
-    .top-match-hero {
-      display: flex;
-      align-items: flex-start;
-      gap: 28px;
-      margin-bottom: 36px;
-    }
-
-    .top-match-img {
-      width: 160px;
-      flex-shrink: 0;
-    }
-
-    .top-match-img img {
-      width: 100%;
-      display: block;
-      filter: invert(1);
-    }
-
-    .top-match-line {
-      font-size: clamp(20px, 3vw, 32px);
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 10px;
-    }
-
-    .top-match-desc {
-      font-size: 15px;
-      font-weight: 400;
-      opacity: 0.7;
-      line-height: 1.6;
-      max-width: 560px;
-    }
-
-    /* Results list */
-    .breed-row {
-      display: grid;
-      grid-template-columns: 220px 1fr 64px;
-      gap: 16px 20px;
-      align-items: center;
-      padding: 14px 0;
-      border-top: 1px solid rgba(255,255,255,0.12);
-    }
-
-    .breed-row:last-child { border-bottom: 1px solid rgba(255,255,255,0.12); }
-
-    .breed-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .breed-thumb {
-      width: 52px;
-      height: 52px;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-
-    .breed-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      filter: invert(1);
-      display: block;
-    }
-
-    .breed-name {
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    .breed-tag {
-      font-size: 11px;
-      opacity: 0.5;
-      font-weight: 500;
-      margin-top: 2px;
-    }
-
-    .bar-track {
-      height: 3px;
-      background: rgba(255,255,255,0.12);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .bar-fill {
-      height: 100%;
-      background: white;
-      border-radius: 2px;
-      width: 0%;
-      transition: width .9s cubic-bezier(0.22,1,0.36,1);
-    }
-
-    .bar-fill.dim { background: rgba(255,255,255,0.35); }
-
-    .pct-label {
-      font-size: 17px;
-      font-weight: 800;
-      text-align: right;
-    }
-
-    .pct-label.dim { opacity: 0.4; }
+    .results-label { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 20px; opacity: 0.6; }
+    .top-match-hero { display: flex; align-items: flex-start; gap: 28px; margin-bottom: 20px; }
+    .top-match-img { width: 160px; flex-shrink: 0; }
+    .top-match-img img { width: 100%; display: block; filter: invert(1); }
+    .top-match-line { font-size: clamp(20px, 3vw, 32px); font-weight: 700; line-height: 1.2; margin-bottom: 10px; }
+    .top-match-desc { font-size: 15px; font-weight: 400; opacity: 0.7; line-height: 1.6; max-width: 560px; }
+    .hinweis-box { margin: 16px 0 24px; padding: 12px 16px; border: 1px dashed rgba(255,255,255,0.5); font-size: 13px; font-weight: 600; opacity: 0.85; line-height: 1.5; display: none; }
+    .hinweis-box.visible { display: block; }
+    .hinweis-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.6; margin-bottom: 4px; }
+    .breed-row { display: grid; grid-template-columns: 220px 1fr 68px; gap: 14px 20px; align-items: center; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); }
+    .breed-row:last-child { border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .breed-info { display: flex; align-items: center; gap: 10px; }
+    .breed-thumb { width: 46px; height: 46px; flex-shrink: 0; overflow: hidden; }
+    .breed-thumb img { width: 100%; height: 100%; object-fit: contain; filter: invert(1); display: block; }
+    .breed-name { font-size: 14px; font-weight: 700; }
+    .breed-tag  { font-size: 11px; opacity: 0.45; font-weight: 500; margin-top: 1px; }
+    .breed-note-tag { font-size: 10px; font-weight: 700; border: 1px solid rgba(255,255,255,0.4); padding: 1px 5px; margin-top: 3px; display: inline-block; letter-spacing: 0.3px; opacity: 0.7; }
+    .bar-track { height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+    .bar-fill  { height: 100%; background: white; border-radius: 2px; width: 0%; transition: width .9s cubic-bezier(0.22,1,0.36,1); }
+    .bar-fill.dim { background: rgba(255,255,255,0.3); }
+    .pct-label     { font-size: 17px; font-weight: 800; text-align: right; }
+    .pct-label.dim { opacity: 0.35; }
 
     /* ── BUTTONS ─────────────────────────────────── */
-    .btn-white {
-      border: 1.5px solid white;
-      background: black;
-      color: white;
-      font-family: 'Outfit', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      padding: 12px 30px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: background .15s, color .15s;
-    }
-
-    .btn-white:hover {
-      background: white;
-      color: black;
-    }
-
-    .btn-white-filled {
-      border: 1.5px solid white;
-      background: white;
-      color: black;
-      font-family: 'Outfit', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      padding: 12px 30px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: background .15s, color .15s;
-    }
-
-    .btn-white-filled:hover {
-      background: black;
-      color: white;
-    }
-
-    .card-footer {
-      margin-top: 32px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255,255,255,0.18);
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+    .btn-white { border: 1.5px solid white; background: black; color: white; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; padding: 12px 30px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background .15s, color .15s; }
+    .btn-white:hover { background: white; color: black; }
+    .btn-white-filled { border: 1.5px solid white; background: white; color: black; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; padding: 12px 30px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background .15s, color .15s; }
+    .btn-white-filled:hover { background: black; color: white; }
+    .card-footer { margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15); display: flex; gap: 12px; flex-wrap: wrap; }
 
     /* ── RESPONSIVE ──────────────────────────────── */
     @media (max-width: 600px) {
       .card { padding: 24px 20px 22px; }
       .start-card { flex-direction: column; }
       .start-card-body { padding: 24px 20px 22px; }
-      .start-card-img { width: 100%; height: 180px; border-left: none; border-top: 1.5px solid rgba(255,255,255,0.18); align-items: center; justify-content: center; }
-      .start-card-img img { width: 180px; height: 180px; object-fit: contain; }
+      .start-card-img { width: 100%; height: 160px; border-left: none; border-top: 1.5px solid rgba(255,255,255,0.18); align-items: center; justify-content: center; }
+      .start-card-img img { width: 160px; object-fit: contain; }
       .ans-group { flex-wrap: wrap; }
       .ans-btn { margin-right: 0; margin-bottom: -1.5px; width: 100%; }
       .start-meta { gap: 24px; }
       .top-match-hero { flex-direction: column; align-items: center; text-align: center; }
-      .top-match-img { width: 140px; }
-      .breed-row { grid-template-columns: 1fr 40px; }
+      .top-match-img { width: 130px; }
+      .breed-row { grid-template-columns: 1fr 50px; }
       .breed-thumb { width: 36px; height: 36px; }
       .bar-track { display: none; }
-      .dots-area { padding-left: 20px; flex-wrap: wrap; gap: 5px; }
+      .dots-area { padding-left: 20px; }
       .card-tail { left: 20px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
 <body>
 
-<div class="page">
-
-  <!-- Top bar -->
-  <div class="topbar">
-    <div class="burger" aria-label="Menü">
-      <span></span>
-      <span></span>
-    </div>
+<!-- ── BUBBLE MENU (fixed) ─────────────────────────────── -->
+<nav class="bubble-menu fixed" aria-label="Hauptnavigation">
+  <div class="bubble logo-bubble">
+    <span class="logo-content">Cat-o-mat<sup>®</sup></span>
   </div>
+  <button class="bubble toggle-bubble menu-btn" id="menuBtn"
+          aria-label="Navigation öffnen" aria-pressed="false" type="button">
+    <span class="menu-line"></span>
+    <span class="menu-line"></span>
+  </button>
+</nav>
 
-  <!-- Title -->
+<div id="bubbleMenuItems" class="bubble-menu-items fixed" aria-hidden="true" style="display:none">
+  <ul class="pill-list" role="menu" aria-label="Menü-Links">
+    <li role="none" class="pill-col">
+      <a role="menuitem" href="#" class="pill-link" id="menuStartseite"
+         style="--item-rot: -5deg" aria-label="Startseite">
+        <span class="pill-label">Startseite</span>
+      </a>
+    </li>
+    <li role="none" class="pill-col">
+      <a role="menuitem" href="mailto:info@cat-o-mat.de" class="pill-link"
+         style="--item-rot: 5deg" aria-label="Kontakt">
+        <span class="pill-label">Kontakt</span>
+      </a>
+    </li>
+    <li role="none" class="pill-col">
+      <a role="menuitem" href="#impressum" class="pill-link" id="menuImpressum"
+         style="--item-rot: 5deg" aria-label="Impressum">
+        <span class="pill-label">Impressum</span>
+      </a>
+    </li>
+    <li role="none" class="pill-col">
+      <a role="menuitem" href="#datenschutz" class="pill-link" id="menuDatenschutz"
+         style="--item-rot: -5deg" aria-label="Datenschutz">
+        <span class="pill-label">Datenschutz</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<!-- ── PAGE ───────────────────────────────────────────── -->
+<div class="page">
+  <div class="spacer-top"></div>
+
   <div class="title-area">
     <div class="main-title">Cat-o-mat<sup style="font-size:0.45em;vertical-align:super">®</sup></div>
     <div class="main-subtitle">Finde deine Traumkatze</div>
   </div>
 
-  <!-- ── START ───────────────────────────────── -->
+  <!-- START -->
   <div class="screen active" id="screenStart">
     <div class="card start-card">
       <div class="card-tail"></div>
       <div class="start-card-body">
         <div class="start-label">Willkommen</div>
         <div class="start-text">
-          Beantworte 12 kurze Fragen zu deinem Lebensstil und erfahre, welche Katzenrasse am besten zu dir passt.
+          Beantworte 20 kurze Fragen zu deinen Wünschen und erfahre, welche von 58 Katzenrassen am besten zu dir passt.
         </div>
         <div class="start-meta">
-          <div class="start-meta-item">
-            <strong>12</strong>
-            <span>Fragen</span>
-          </div>
-          <div class="start-meta-item">
-            <strong>8</strong>
-            <span>Katzenrassen</span>
-          </div>
-          <div class="start-meta-item">
-            <strong>3 min</strong>
-            <span>Dauer</span>
-          </div>
+          <div class="start-meta-item"><strong>20</strong><span>Fragen</span></div>
+          <div class="start-meta-item"><strong>58</strong><span>Rassen</span></div>
+          <div class="start-meta-item"><strong>5 min</strong><span>Dauer</span></div>
         </div>
         <button class="btn-white-filled" onclick="startQuiz()">
           Jetzt starten
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
       <div class="start-card-img">
-        <img src="assets/cat-start.webp" alt="Katze" loading="lazy">
+        <img src="assets/cat-start.webp" alt="" loading="lazy">
       </div>
     </div>
-    <div class="dots-area">
-      <!-- 12 upcoming dots as preview -->
-      <script>
-        for (let i = 0; i < 12; i++) document.write('<div class="dot upcoming"></div>');
-      </script>
-    </div>
+    <div class="dots-area" id="startDots"></div>
   </div>
 
-  <!-- ── QUESTION ─────────────────────────────── -->
+  <!-- QUESTION -->
   <div class="screen" id="screenQuestion">
     <div class="card">
       <div class="card-tail"></div>
-      <div class="q-header" id="qHeader">1/12 Aktivität</div>
+      <div class="q-header" id="qHeader">1/20 Kuscheligkeit</div>
       <div class="q-text"   id="qText"></div>
       <div class="q-actions">
         <div class="ans-group">
@@ -531,14 +334,14 @@
         </div>
         <button class="skip-btn" onclick="skipQuestion()">
           These überspringen
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
     </div>
     <div class="dots-area" id="dotsArea"></div>
   </div>
 
-  <!-- ── RESULTS ───────────────────────────────── -->
+  <!-- RESULTS -->
   <div class="screen" id="screenResults">
     <div class="card">
       <div class="card-tail"></div>
@@ -550,114 +353,290 @@
           <div class="top-match-desc" id="topMatchDesc"></div>
         </div>
       </div>
+      <div class="hinweis-box" id="hinweisBox">
+        <div class="hinweis-label">Wichtiger Hinweis</div>
+        <div id="hinweisText"></div>
+      </div>
       <div id="breedList"></div>
       <div class="card-footer">
         <button class="btn-white" onclick="restartQuiz()">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8a6 6 0 1 1 1.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M2 12V8h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8a6 6 0 1 1 1.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M2 12V8h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Neu starten
         </button>
       </div>
     </div>
-    <div class="dots-area">
-      <script>
-        for (let i = 0; i < 12; i++) document.write('<div class="dot done"></div>');
-      </script>
-    </div>
+    <div class="dots-area" id="resultDots"></div>
   </div>
 
 </div><!-- .page -->
 
 <script>
-/* ── DATA ────────────────────────────────────────────────── */
+/* ── BUBBLE MENU ─────────────────────────────────────────── */
+(function() {
+  const btn     = document.getElementById('menuBtn');
+  const overlay = document.getElementById('bubbleMenuItems');
+  let open = false;
 
-const QUESTIONS = [
-  { text: "Ich führe einen aktiven, bewegungsreichen Alltag.",                     label: "Aktivität",     key: "activity"   },
-  { text: "Ich kann täglich viel Zeit mit meiner Katze verbringen.",               label: "Zeit",          key: "time"       },
-  { text: "Körperkontakt und Kuscheligkeit mit meiner Katze sind mir sehr wichtig.",label: "Kuscheligkeit", key: "cuddly"     },
-  { text: "Ich habe bereits Erfahrung in der Katzenhaltung.",                      label: "Erfahrung",     key: "experience" },
-  { text: "Ich lebe in einem Haus mit Garten oder habe generell viel Platz.",      label: "Wohnraum",      key: "space"      },
-  { text: "Ich mag Katzen, die viel kommunizieren und lautstark miauzen.",         label: "Kommunikation", key: "vocal"      },
-  { text: "Eine pflegeleichte Katze mit wenig Fellpflege-Aufwand ist mir wichtig.",label: "Fellpflege",    key: "grooming"   },
-  { text: "Meine Katze soll sehr menschenbezogen und anhänglich sein.",            label: "Bindung",       key: "social"     },
-  { text: "Bei mir zuhause leben auch Kinder oder andere Haustiere.",              label: "Familie",       key: "kids"       },
-  { text: "Ein besonderes oder auffälliges Äußeres meiner Katze ist mir wichtig.", label: "Optik",         key: "look"       },
-  { text: "Ich bin den Großteil des Tages zu Hause.",                              label: "Zuhause",       key: "home"       },
-  { text: "Ich mag Katzen, die gern klettern und viel Bewegungsraum brauchen.",    label: "Sportlichkeit", key: "athletic"   }
-];
+  function openMenu() {
+    open = true;
+    btn.classList.add('open');
+    btn.setAttribute('aria-pressed', 'true');
+    overlay.style.display = 'flex';
+    overlay.setAttribute('aria-hidden', 'false');
 
-const BREEDS = [
-  {
-    name: "Maine Coon",
-    tag: "Groß, freundlich, waldkatzenartig",
-    desc: "Die Maine Coon ist eine der größten Hauskatzen mit einem treuen, hundeähnlichen Wesen. Verspielt, intelligent, kinderfreundlich — und ihr dichtes Fell braucht regelmäßige Pflege.",
-    ideal: { activity:2, time:2, cuddly:2, experience:1, space:2, vocal:1, grooming:0, social:2, kids:2, look:2, home:1, athletic:2 }
-  },
-  {
-    name: "Perser",
-    tag: "Ruhig, sanftmütig, pflegeintensiv",
-    desc: "Die Perser ist sanft und liebt es zu schmusen und zu dösen. Ihr langes, seidiges Fell erfordert tägliche Pflege. Ideal für entspannte Haushalte ohne Hektik.",
-    ideal: { activity:0, time:2, cuddly:2, experience:1, space:0, vocal:0, grooming:0, social:2, kids:1, look:2, home:2, athletic:0 }
-  },
-  {
-    name: "Britisch Kurzhaar",
-    tag: "Ausgeglichen, unabhängig, robust",
-    desc: "Die Britisch Kurzhaar ist entspannt und pflegeleicht. Sie kommt gut mit dem Alleinsein zurecht und ist ein unkomplizierter Begleiter für vielbeschäftigte Menschen.",
-    ideal: { activity:1, time:0, cuddly:1, experience:0, space:0, vocal:0, grooming:2, social:1, kids:2, look:1, home:0, athletic:0 }
-  },
-  {
-    name: "Siamkatze",
-    tag: "Temperamentvoll, gesprächig, anhänglich",
-    desc: "Die Siamkatze ist laut, liebevoll und absolut menschenbezogen. Sie miaut viel, ist hochintelligent und hasst Einsamkeit. Perfekt für kommunikative Menschen.",
-    ideal: { activity:2, time:2, cuddly:2, experience:1, space:0, vocal:2, grooming:2, social:2, kids:1, look:1, home:2, athletic:2 }
-  },
-  {
-    name: "Bengalkatze",
-    tag: "Wild, sportlich, spektakulär",
-    desc: "Die Bengalkatze sieht aus wie ein kleiner Leopard. Sie braucht viel Beschäftigung und Platz. Für erfahrene Halter, die Energie und ein einzigartiges Aussehen schätzen.",
-    ideal: { activity:2, time:2, cuddly:1, experience:2, space:2, vocal:1, grooming:2, social:1, kids:1, look:2, home:0, athletic:2 }
-  },
-  {
-    name: "Ragdoll",
-    tag: "Sanft, entspannt, absolutes Schmusekind",
-    desc: "Die Ragdoll ist das ruhigste Schmusekind — sie erschlafft beim Aufnehmen wie eine Stoffpuppe. Absolut kinderfreundlich, ideal für Menschen, die viel Zeit zu Hause sind.",
-    ideal: { activity:0, time:2, cuddly:2, experience:0, space:0, vocal:0, grooming:1, social:2, kids:2, look:2, home:2, athletic:0 }
-  },
-  {
-    name: "Abessinier",
-    tag: "Neugierig, aktiv, elegant",
-    desc: "Der Abessinier ist eine der ältesten Rassen — athletisch, elegant und ungemein neugierig. Er erkundet alles und braucht viel Beschäftigung. Für aktive, erfahrene Halter.",
-    ideal: { activity:2, time:1, cuddly:1, experience:2, space:1, vocal:1, grooming:2, social:1, kids:1, look:1, home:0, athletic:2 }
-  },
-  {
-    name: "Sphynx",
-    tag: "Haarlos, wärmesuchend, anhänglich",
-    desc: "Die Sphynx ist trotz ihres ungewöhnlichen Aussehens extrem schmusig — sie sucht ständig Körperwärme. Verspielt, social und ein echter Hingucker für mutige Katzenliebhaber.",
-    ideal: { activity:1, time:2, cuddly:2, experience:2, space:0, vocal:1, grooming:1, social:2, kids:1, look:2, home:2, athletic:1 }
+    const pills  = overlay.querySelectorAll('.pill-link');
+    const labels = overlay.querySelectorAll('.pill-label');
+
+    gsap.set(pills,  { scale: 0 });
+    gsap.set(labels, { y: 28, autoAlpha: 0 });
+
+    pills.forEach((pill, i) => {
+      gsap.to(pill,     { scale: 1, duration: 0.5, ease: 'back.out(1.5)', delay: i * 0.1 });
+      gsap.to(labels[i],{ y: 0, autoAlpha: 1, duration: 0.45, ease: 'power3.out', delay: i * 0.1 + 0.06 });
+    });
   }
+
+  function closeMenu() {
+    open = false;
+    btn.classList.remove('open');
+    btn.setAttribute('aria-pressed', 'false');
+    overlay.setAttribute('aria-hidden', 'true');
+
+    const pills  = overlay.querySelectorAll('.pill-link');
+    const labels = overlay.querySelectorAll('.pill-label');
+
+    gsap.to(labels, { y: 28, autoAlpha: 0, duration: 0.18, ease: 'power3.in' });
+    gsap.to(pills, {
+      scale: 0, duration: 0.22, ease: 'power3.in',
+      onComplete: () => { overlay.style.display = 'none'; }
+    });
+  }
+
+  btn.addEventListener('click', () => open ? closeMenu() : openMenu());
+
+  // Startseite pill → restart quiz
+  document.getElementById('menuStartseite').addEventListener('click', (e) => {
+    e.preventDefault();
+    closeMenu();
+    setTimeout(() => restartQuiz(), 250);
+  });
+
+  // Close on overlay backdrop click
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeMenu();
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && open) closeMenu();
+  });
+})();
+
+/* ── QUESTIONS ───────────────────────────────────────────── */
+const QUESTIONS = [
+  { label: "Kuscheligkeit",    text: "Möchtest du, dass deine Katze gern kuschelt und auf dem Schoß liegt?" },
+  { label: "Ruhig",            text: "Möchtest du eher eine ruhige und gemütliche Katze (nicht sehr aktiv)?" },
+  { label: "Verspielt",        text: "Möchtest du eine Katze, die sehr verspielt und aktiv ist?" },
+  { label: "Kinder",           text: "Soll deine Katze kinderfreundlich und geduldig mit Kindern sein?" },
+  { label: "Haustiere",        text: "Soll deine Katze gut mit anderen Haustieren (Katzen/Hunde) verträglich sein?" },
+  { label: "Vokal",            text: "Ist dir wichtig, dass die Katze sehr gesprächig und vokal ist (viel miaut)?" },
+  { label: "Anhänglich",       text: "Soll deine Katze sehr anhänglich und menschenbezogen sein?" },
+  { label: "Pflegeleicht",     text: "Legst du Wert auf eine besonders pflegeleichte Rasse (wenig Fellpflege)?" },
+  { label: "Kletterfreude",    text: "Soll deine Katze viel Energie und Kletterfreude haben (aktiver Jagdtrieb)?" },
+  { label: "Intelligenz",      text: "Soll deine Katze besonders intelligent und leicht trainierbar sein?" },
+  { label: "Allergie",         text: "Legst du Wert auf eine hypoallergene oder haararme Rasse?" },
+  { label: "Bes. Aussehen",    text: "Ist dir ein ungewöhnliches Aussehen (z. B. gefaltete Ohren, kurzes Gesicht, kein Fell) wichtig?" },
+  { label: "Temperament",      text: "Soll die Katze ein langsames, gemütliches Temperament haben und wenig Stress bei Veränderungen?" },
+  { label: "Robustheit",       text: "Legst du Wert auf eine langlebige Rasse mit robuster Gesundheit?" },
+  { label: "Wohnungskatze",    text: "Planst du, die Katze hauptsächlich drinnen zu halten (Wohnungskatze)?" },
+  { label: "Leise",            text: "Soll die Katze wenig miauen und insgesamt leise sein?" },
+  { label: "Jagdinstinkt",     text: "Soll die Katze einen ausgeprägten Jagdinstinkt haben (Mäusefänger)?" },
+  { label: "Tierarztaufwand",  text: "Bist du bereit für häufigere tierärztliche Betreuung oder spezielle Gesundheitsprobleme?" },
+  { label: "Mit Fremden",      text: "Ist dir ein ausgeprägtes Sozialverhalten gegenüber Fremden und Gästen wichtig?" },
+  { label: "Einsteiger",       text: "Möchtest du eine Rasse, die besonders für Einsteiger geeignet ist (pflegeleicht, ausgeglichen)?" },
 ];
 
 /* ── BREED IMAGES ────────────────────────────────────────── */
 const BREED_IMG = {
-  "Maine Coon":        'assets/cat-maine-coon.webp',
-  "Perser":            'assets/cat-perser.webp',
-  "Britisch Kurzhaar": 'assets/cat-bkh.webp',
-  "Siamkatze":         'assets/cat-siam.webp',
-  "Bengalkatze":       'assets/cat-bengal.webp',
-  "Ragdoll":           'assets/cat-ragdoll.webp',
-  "Abessinier":        'assets/cat-abessinier.webp',
-  "Sphynx":            'assets/cat-sphynx.webp',
+  "Maine-Coon-Katze":"assets/cat-maine-coon.webp","Norwegische Waldkatze":"assets/cat-maine-coon.webp",
+  "Sibirische Katze":"assets/cat-maine-coon.webp","Neva Masquarade":"assets/cat-maine-coon.webp",
+  "Türkisch Angora":"assets/cat-maine-coon.webp","Türkisch Van":"assets/cat-maine-coon.webp",
+  "Perserkatze":"assets/cat-perser.webp","Himalayakatze":"assets/cat-perser.webp",
+  "Exotic Shorthair":"assets/cat-perser.webp","Ragamuffin":"assets/cat-perser.webp",
+  "Britisch Kurzhaar":"assets/cat-bkh.webp","Britisch Langhaar":"assets/cat-bkh.webp",
+  "Kartäuser-Katze":"assets/cat-bkh.webp","Russisch Blau":"assets/cat-bkh.webp",
+  "Europäisch Kurzhaar":"assets/cat-bkh.webp","Deutsche Langhaarkatze":"assets/cat-bkh.webp",
+  "American Shorthair":"assets/cat-bkh.webp","Nebelung":"assets/cat-bkh.webp",
+  "Ragdoll":"assets/cat-ragdoll.webp","Heilige Birma":"assets/cat-ragdoll.webp",
+  "Siamkatze":"assets/cat-siam.webp","Orientalisch Kurzhaar":"assets/cat-siam.webp",
+  "Balinese":"assets/cat-siam.webp","Javanese":"assets/cat-siam.webp",
+  "Thaikatze":"assets/cat-siam.webp","Burma":"assets/cat-siam.webp",
+  "Tonkanese":"assets/cat-siam.webp","Bombay-Katze":"assets/cat-siam.webp",
+  "Bengalkatze":"assets/cat-bengal.webp","Savannah Katze":"assets/cat-bengal.webp",
+  "Ocicat":"assets/cat-bengal.webp","Toyger":"assets/cat-bengal.webp",
+  "Ägyptische Mau":"assets/cat-bengal.webp",
+  "Abessinier":"assets/cat-abessinier.webp","Falbkatze":"assets/cat-abessinier.webp",
+  "Somali-Katze":"assets/cat-abessinier.webp","Ceylonkatze":"assets/cat-abessinier.webp",
+  "Sphynx-Katze":"assets/cat-sphynx.webp","Don Sphynx":"assets/cat-sphynx.webp",
+  "Peterbald":"assets/cat-sphynx.webp","Cornish Rex":"assets/cat-sphynx.webp",
+  "Devon Rex":"assets/cat-sphynx.webp","German Rex":"assets/cat-sphynx.webp",
+  "Lykoi":"assets/cat-sphynx.webp",
 };
+function breedImg(n) { return BREED_IMG[n] || "assets/cat-start.webp"; }
+
+/* ── BREEDS (58) — ideal[i]: A=2 B=1 C=0 ────────────────── */
+const BREEDS = [
+  {name:"Abessinier",desc:"Schlanke Athleten mit unersättlicher Neugier — immer in Bewegung, ideal für aktive Menschen.",note:null,
+   ideal:[1,0,2,2,1,0,1,1,2,2,0,0,0,2,2,0,2,0,1,2]},
+  {name:"Ägyptische Mau",desc:"Eine der wenigen natürlich gefleckten Rassen — schnell, verspielt und ihrer Bezugsperson treu.",note:null,
+   ideal:[0,1,2,2,1,0,1,1,2,2,0,0,0,2,2,0,2,0,1,2]},
+  {name:"American Curl",desc:"Bekannt durch ihre nach hinten gerollten Ohren — verspielt, sanft und sehr anpassungsfähig.",note:null,
+   ideal:[1,1,2,2,1,0,1,1,1,2,0,0,1,2,2,0,1,0,1,2]},
+  {name:"American Shorthair",desc:"Robuste Allrounderin mit ausgeglichenem Charakter — ideal für Familien und Erstbesitzer.",note:null,
+   ideal:[1,2,1,2,2,0,1,2,1,2,0,2,2,2,2,0,1,0,1,2]},
+  {name:"American Wirehair",desc:"Rauhhaariger Cousin der American Shorthair — entspannt, anpassungsfähig, pflegeleicht.",note:null,
+   ideal:[1,1,2,2,1,0,1,1,1,2,0,0,1,2,2,0,1,0,1,2]},
+  {name:"Balinese",desc:"Langhaarige Variante der Siamkatze — ebenso redselig und anhänglich, aber mit elegantem Seidenfell.",note:null,
+   ideal:[1,0,2,0,1,2,2,1,2,2,0,0,0,2,2,0,2,0,1,0]},
+  {name:"Bengalkatze",desc:"Sieht aus wie ein kleiner Leopard. Braucht viel Beschäftigung und Platz — nichts für Einsteiger.",
+   note:"In vielen Kommunen ist die Haltung genehmigungspflichtig. Bitte vorher beim zuständigen Veterinäramt informieren.",
+   ideal:[0,0,2,2,1,0,1,1,2,2,0,2,0,2,2,0,2,0,1,0]},
+  {name:"Bombay-Katze",desc:"Kompakte schwarze Samtkatze mit goldenem Blick — anhänglich, verspielt und hundeähnlich treu.",note:null,
+   ideal:[2,2,1,2,2,1,2,1,1,2,0,0,2,2,2,0,1,0,1,2]},
+  {name:"Britisch Kurzhaar",desc:"Der britische Gentleman — ruhig, robust, rundes Plüschgesicht. Ideal für Familien und Berufstätige.",note:null,
+   ideal:[2,2,1,2,1,0,1,2,1,2,0,0,2,2,2,0,1,0,2,2]},
+  {name:"Britisch Langhaar",desc:"Wie die Britisch Kurzhaar, aber mit dichtem Langhaarfell — ebenso ausgeglichen und kinderfreundlich.",note:null,
+   ideal:[2,2,1,2,1,0,1,2,1,2,0,0,2,2,2,0,1,0,2,2]},
+  {name:"Burma",desc:"Seidig, kompakt, unglaublich anhänglich — folgt ihrem Menschen überallhin wie ein Schatten.",note:null,
+   ideal:[2,0,2,2,1,0,2,1,2,2,0,0,2,2,2,0,1,0,1,2]},
+  {name:"Burmilla",desc:"Elegante Kreuzung aus Burma und Chinchilla-Perser — sanft, verspielt und mit silbrigem Schimmer.",note:null,
+   ideal:[1,1,2,2,1,0,1,1,1,2,0,0,1,2,2,0,1,0,1,2]},
+  {name:"Ceylonkatze",desc:"Seltene Rasse aus Sri Lanka — schmal, aktiv, neugierig und abenteuerlustig.",note:null,
+   ideal:[0,0,2,2,1,0,1,1,2,2,0,0,0,2,2,0,2,0,1,2]},
+  {name:"Cornish Rex",desc:"Lockiges, weiches Fell und riesige Ohren — sehr aktiv, klug und liebt Gesellschaft.",note:null,
+   ideal:[1,0,2,2,1,0,1,1,2,1,1,2,0,2,2,0,1,1,1,1]},
+  {name:"Deutsche Langhaarkatze",desc:"Robuste, natürliche Rasse mit ausgeglichenem Charakter — pflegeleicht und familientauglich.",note:null,
+   ideal:[2,2,1,2,1,0,1,2,1,2,0,0,2,2,2,0,1,0,1,2]},
+  {name:"Devon Rex",desc:"Elfenhafte Erscheinung mit lockigem Fell und riesigen Augen — verspielt, klug und anhänglich.",note:null,
+   ideal:[1,0,2,2,1,0,1,1,2,1,1,2,0,2,2,0,1,1,1,1]},
+  {name:"Don Sphynx",desc:"Haarlose russische Rasse — wärmeliebend, schmusig, braucht viel Pflege und Gesellschaft.",note:null,
+   ideal:[1,0,2,2,1,0,1,1,2,1,1,1,0,2,2,0,1,1,1,1]},
+  {name:"Europäisch Kurzhaar",desc:"Die ursprüngliche europäische Hauskatze — robust, anpassungsfähig und unkompliziert.",note:null,
+   ideal:[1,2,1,2,1,0,1,2,1,2,0,0,2,2,2,0,1,0,2,2]},
+  {name:"Exotic Shorthair",desc:"Perser im Kurzhaarkleid — gleich gemütlich und schmusig, aber deutlich pflegeleichter.",note:null,
+   ideal:[2,2,1,2,1,0,1,2,0,2,0,0,2,2,2,0,1,2,2,2]},
+  {name:"Falbkatze",desc:"Enger Verwandter der Hauskatze — wild, aktiv, nicht für Anfänger.",note:null,
+   ideal:[0,1,2,2,1,0,1,1,2,2,0,0,0,2,2,0,2,0,1,2]},
+  {name:"German Rex",desc:"Lockige, seltene Rasse aus Deutschland — aktiv, klug und sehr menschenbezogen.",note:null,
+   ideal:[1,0,2,2,1,0,1,1,2,1,1,2,0,2,2,0,1,1,1,1]},
+  {name:"Glückskatzen",desc:"Dreifarbige Katzen — keine eigenständige Rasse, sondern eine Fellfarb-Bezeichnung.",
+   note:"Keine eigenständige Rasse, sondern eine Fellfarb-Bezeichnung. Der Charakter hängt von der tatsächlichen Rasse oder dem Mischlingshintergrund ab.",
+   ideal:[1,1,2,2,1,0,1,1,1,2,0,0,1,2,2,0,1,0,1,2]},
+  {name:"Havana Katze",desc:"Schokoladenbraune Schönheit mit leuchtend grünen Augen — verspielt, neugierig und anhänglich.",note:null,
+   ideal:[1,1,2,2,1,0,1,1,1,2,0,0,1,2,2,0,1,0,1,2]},
+  {name:"Heilige Birma",desc:"Seidenweich, ruhig und sanft — die Birma liebt Menschen und ist sehr familienfreundlich.",note:null,
+   ideal:[2,1,2,2,1,0,1,2,1,2,0,0,2,2,2,0,1,0,1,2]},
+  {name:"Himalayakatze",desc:"Kreuzung aus Perser und Siamese — gemütliches Perserwesen mit eleganter Farb-Pointierung.",note:null,
+   ideal:[2,2,1,2,1,0,1,2,0,2,0,0,2,2,2,0,1,2,2,2]},
+  {name:"Japanese Bobtail",desc:"Kurzschwänzige japanische Glückskatze — aktiv, kommunikativ und voller Energie.",note:null,
+   ideal:[1,1,2,2,1,0,1,1,2,2,0,0,1,2,2,0,1,0,1,2]},
+  {name:"Javanese",desc:"Schlanke, lebhafte Variante mit mittellangem Fell — redselig, klug und sehr menschenbezogen.",note:null,
+   ideal:[1,0,2,0,1,2,2,1,2,2,0,0,0,2,2,0,2,0,1,0]},
+  {name:"Kartäuser-Katze",desc:"Stille, beobachtende Rasse mit mächtigem Körper — ruhig, treu und überaus robust.",note:null,
+   ideal:[2,2,1,2,1,0,1,2,1,2,0,0,2,2,2,0,1,0,1,2]},
+  {name:"Khao Manee",desc:"Seltene weiße Rassekatze aus Thailand — aktiv, neugierig und ihrer Familie ergeben.",note:null,
+   ideal:[1,0,2,2,1,0,1,1,2,2,0,0,0,2,2,0,2,0,1,2]},
+  {name:"Koratkatze",desc:"Silbergraue Glückskatze aus Thailand — ruhig, anhänglich und sehr kinderfreundlich.",note:null,
+   ideal:[1,1,2,2,1,0,1,1,2,2,0,0,1,2,2,0,1,0,1,2]},
+  {name:"Kurilen Bobtail",desc:"Robuste Inselkatze mit Stummelschwanz — aktiv, selbstständig und jagdfreudig.",note:null,
+   ideal:[1,1,2,2,1,0,1,1,2,2,0,0,1,2,2,0,1,0,1,2]},
+  {name:"Lykoi",desc:"Die sogenannte Werwolfkatze — ungewöhnliches Fell, sehr aktiv. Für mutige Liebhaber.",note:null,
+   ideal:[1,0,2,2,1,0,1,1,2,1,1,1,0,2,2,0,1,1,1,1]},
+  {name:"Maine-Coon-Katze",desc:"Sanfter Riese mit hundetreuem Charakter — verspielt, kinderfreundlich und wasserfest.",note:null,
+   ideal:[2,1,2,2,1,0,1,2,1,2,0,0,2,2,2,0,1,0,1,2]},
+  {name:"Manx",desc:"Schwanzlose irische Rasse — aktiv und familientreu, aber mit zuchtbedingten Gesundheitsrisiken.",
+   note:"Leiden manchmal zuchtbedingt unter Gesundheitsproblemen (z. B. Wirbel- und Schwanzanomalien, Manx-Syndrom). Tierärztliche Vorsorge empfohlen.",
+   ideal:[1,1,2,2,1,0,1,1,2,2,0,0,1,2,2,0,1,0,1,2]},
+  {name:"Munchkin-Katze",desc:"Kurzbeinige Rassekatze mit lebhaftem Wesen — herzerwärmend, aber ethisch umstritten.",
+   note:"Chondrodysplasie (zuchtbedingt kurze Beine) kann zu Gelenkproblemen führen. Die Zucht ist in einigen Ländern aus Tierschutzgründen umstritten.",
+   ideal:[1,1,2,2,1,0,1,1,2,1,0,1,0,2,2,0,1,0,1,1]},
+  {name:"Nebelung",desc:"Scheue Rasse mit seidigem Blaugrau-Fell — sanft, treu und ideal für ruhige Haushalte.",note:null,
+   ideal:[1,2,1,2,1,0,1,2,1,2,0,0,2,2,2,0,1,0,1,2]},
+  {name:"Neva Masquarade",desc:"Sibirische Katze mit Colourpoint-Musterung — kräftig, anhänglich und robust.",note:null,
+   ideal:[2,1,2,2,1,0,1,2,1,2,0,0,2,2,2,0,1,0,1,2]},
+  {name:"Norwegische Waldkatze",desc:"Wikingerin mit doppeltem Winterfell — aktiv, unabhängig und naturverbunden.",note:null,
+   ideal:[0,1,2,2,1,0,1,2,1,2,0,0,0,2,2,0,2,0,1,0]},
+  {name:"Ocicat",desc:"Sieht aus wie ein Wildtier, ist aber reine Hauskatze — aktiv, neugierig und sozial.",note:null,
+   ideal:[0,0,2,2,1,0,1,1,2,2,0,0,0,2,2,0,2,0,1,2]},
+  {name:"Orientalisch Kurzhaar",desc:"Die extremste Variante der Siamese — noch spitzer, noch lauter, noch anhänglicher.",note:null,
+   ideal:[0,0,2,0,1,2,2,1,2,1,0,0,0,2,2,0,2,0,1,0]},
+  {name:"Perserkatze",desc:"Königin der Gemütlichkeit — luxuriöses Fell und sanftes Wesen, braucht tägliche Pflege.",
+   note:"Brachycephale Rasse: Das flache Gesicht kann zu Atemproblemen führen. Regelmäßige tierärztliche Kontrolle ist empfohlen.",
+   ideal:[2,2,1,2,1,0,1,2,0,2,0,0,2,2,2,0,1,2,2,2]},
+  {name:"Peterbald",desc:"Russische Haarlosigkeit auf schlankem Orientalischen Körper — aktiv, sozial und pflegebedürftig.",note:null,
+   ideal:[1,0,2,2,1,0,1,1,2,1,1,1,0,2,2,0,1,1,1,1]},
+  {name:"Pixiebob",desc:"Sieht aus wie ein kleiner Bobcat — treu, aktiv und mit hundeähnlichem Charakter.",note:null,
+   ideal:[1,1,2,2,1,0,1,1,2,2,0,0,1,2,2,0,1,0,1,2]},
+  {name:"Ragamuffin",desc:"Große, sanfte Schmusekatze — ähnlich der Ragdoll, etwas robuster und entspannter.",note:null,
+   ideal:[2,1,2,2,1,0,1,2,1,2,0,0,2,2,2,0,1,0,1,2]},
+  {name:"Ragdoll",desc:"Das Kuschel-Ideal — erschlafft beim Hochnehmen, liebt Menschen, verträgt sich mit jedem.",note:null,
+   ideal:[2,2,1,2,1,0,1,2,1,2,0,0,2,2,2,0,1,0,1,2]},
+  {name:"Russisch Blau",desc:"Elegante, scheue Schönheit mit smaragdgrünen Augen — treu der Familie, zurückhaltend mit Fremden.",note:null,
+   ideal:[1,2,1,2,1,0,1,2,1,2,1,0,2,2,2,0,1,0,1,2]},
+  {name:"Savannah Katze",desc:"Hochbeinige Wildkatzen-Kreuzung mit Serval-Charakter — beeindruckend, aber genehmigungspflichtig.",
+   note:"In vielen Kommunen ist die Haltung genehmigungspflichtig (je nach F-Generation). Bitte unbedingt beim zuständigen Veterinäramt anfragen.",
+   ideal:[0,0,2,0,1,0,1,1,2,2,0,2,0,2,2,0,2,0,1,0]},
+  {name:"Scottish Fold",desc:"Owl-Ohren und sanftes Wesen — aber zuchtbedingte Gelenkprobleme sind ein ernstes Thema.",
+   note:"Osteochondrodysplasie: Die Genmutation, die gefaltete Ohren erzeugt, verursacht gleichzeitig schmerzhafte Knorpel- und Gelenkerkrankungen. Ethisch umstritten.",
+   ideal:[1,1,2,2,1,0,1,1,2,1,0,0,1,2,2,0,1,0,1,1]},
+  {name:"Selkirk Rex",desc:"Lockiges Plüschfell und entspannter Charakter — gesellig, sanft und pflegeleicht im Umgang.",note:null,
+   ideal:[1,1,2,2,1,0,1,1,2,1,0,0,1,2,2,0,1,0,1,1]},
+  {name:"Siamkatze",desc:"Die lauteste Katze der Welt — dramatisch, anhänglich und hochintelligent. Für Geduldige.",note:null,
+   ideal:[0,0,2,0,1,2,2,1,2,1,0,0,0,2,2,0,2,0,1,0]},
+  {name:"Sibirische Katze",desc:"Kräftige, natürliche Rasse — aktiv, sanft, familientauglich und möglicherweise hypoallergen.",note:null,
+   ideal:[1,2,1,2,1,0,1,2,1,2,1,0,2,2,2,0,1,0,1,2]},
+  {name:"Singapura",desc:"Kleinste anerkannte Rasse — aber groß in Neugier und Energie. Zart, aktiv und verschmust.",note:null,
+   ideal:[1,1,2,2,1,0,1,1,2,2,0,0,0,2,2,0,1,0,1,2]},
+  {name:"Somali-Katze",desc:"Langhaarvariante des Abessiniers — lebhaft, neugierig und immer in Bewegung.",note:null,
+   ideal:[0,0,2,2,1,0,1,1,2,2,0,0,0,2,2,0,2,0,1,2]},
+  {name:"Sphynx-Katze",desc:"Nackt, warm und unendlich schmusig — sucht ständig Körperwärme und braucht intensive Hautpflege.",
+   note:"Benötigt regelmäßige Hautpflege (Abwischen von Fettfilm) und muss warm gehalten werden. Häufigere Tierarztbesuche einplanen.",
+   ideal:[1,0,2,2,1,0,1,1,2,1,1,1,0,2,2,0,1,1,1,1]},
+  {name:"Thaikatze",desc:"Traditionelle Siamese mit runderen Formen — kommunikativ, anhänglich und lebhaft.",note:null,
+   ideal:[1,0,2,2,1,0,1,1,2,2,0,0,1,2,2,0,1,0,1,2]},
+  {name:"Tonkanese",desc:"Kreuzung aus Burmese und Siamese — gesellig, neugierig und sehr anhänglich.",note:null,
+   ideal:[1,1,2,2,1,0,1,1,2,2,0,0,1,2,2,0,1,0,1,2]},
+  {name:"Toyger",desc:"Gezüchteter Mini-Tiger im Wohnzimmer — aktiv, neugierig und ein echter Blickfang.",note:null,
+   ideal:[0,0,2,2,1,0,1,1,2,2,0,0,0,2,2,0,2,0,1,2]},
+  {name:"Türkisch Angora",desc:"Elegante, jahrhundertealte Rasse — aktiv, intelligent und sehr anhänglich.",note:null,
+   ideal:[1,1,2,2,1,0,1,2,1,2,0,0,0,2,2,0,2,0,1,1]},
+  {name:"Türkisch Van",desc:"Wasserliebende Türkin mit halbangora-Fell — aktiv, unabhängig und temperamentvoll.",note:null,
+   ideal:[1,1,2,2,1,0,1,2,1,2,0,0,0,2,2,0,2,0,1,1]},
+  {name:"Tuxedo-Katzen",desc:"Schwarz-weiß gemusterte Katzen — keine Rasse, sondern ein Fellmuster. Charakter je nach Herkunft.",
+   note:"Keine eigenständige Rasse, sondern eine Fellfarb-Bezeichnung. Der Charakter hängt von der tatsächlichen Rasse oder dem Mischlingshintergrund ab.",
+   ideal:[1,1,2,2,1,0,1,1,1,2,0,0,1,2,2,0,1,0,1,2]},
+];
 
 /* ── STATE ───────────────────────────────────────────────── */
 let currentQ = 0;
-let answers  = {}; // index → 0|1|2|null (null = skipped)
+let answers  = {};
+
+/* ── INIT DOTS ───────────────────────────────────────────── */
+(function() {
+  const n = QUESTIONS.length;
+  ['startDots','resultDots'].forEach((id, ri) => {
+    const area = document.getElementById(id);
+    for (let i = 0; i < n; i++) {
+      const d = document.createElement('div');
+      d.className = ri === 0 ? 'dot upcoming' : 'dot done';
+      area.appendChild(d);
+    }
+  });
+})();
 
 /* ── HELPERS ─────────────────────────────────────────────── */
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => {
-    s.classList.remove('active');
-    s.style.display = 'none';
-  });
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
   const el = document.getElementById(id);
   el.style.display = 'block';
   requestAnimationFrame(() => el.classList.add('active'));
@@ -665,131 +644,105 @@ function showScreen(id) {
 
 /* ── QUIZ ────────────────────────────────────────────────── */
 function startQuiz() {
-  currentQ = 0;
-  answers  = {};
+  currentQ = 0; answers = {};
   renderQuestion();
   showScreen('screenQuestion');
 }
 
 function renderQuestion() {
-  const q = QUESTIONS[currentQ];
-  const n = QUESTIONS.length;
-
-  document.getElementById('qHeader').textContent = `${currentQ + 1}/${n} ${q.label}`;
+  const q = QUESTIONS[currentQ], n = QUESTIONS.length;
+  document.getElementById('qHeader').textContent = `${currentQ+1}/${n} ${q.label}`;
   document.getElementById('qText').textContent   = q.text;
-
-  ['btnAgree','btnNeutral','btnDisagree'].forEach(id =>
-    document.getElementById(id).classList.remove('sel')
-  );
-
-  const saved = answers[currentQ];
-  if (saved === 2) document.getElementById('btnAgree').classList.add('sel');
-  else if (saved === 1) document.getElementById('btnNeutral').classList.add('sel');
-  else if (saved === 0) document.getElementById('btnDisagree').classList.add('sel');
-
+  ['btnAgree','btnNeutral','btnDisagree'].forEach(id => document.getElementById(id).classList.remove('sel'));
+  const s = answers[currentQ];
+  if      (s===2) document.getElementById('btnAgree').classList.add('sel');
+  else if (s===1) document.getElementById('btnNeutral').classList.add('sel');
+  else if (s===0) document.getElementById('btnDisagree').classList.add('sel');
   renderDots();
 }
 
 function renderDots() {
   const area = document.getElementById('dotsArea');
-  const n    = QUESTIONS.length;
   area.innerHTML = '';
-  for (let i = 0; i < n; i++) {
-    const d  = document.createElement('div');
-    const answered = answers[i] !== undefined;
-    if (i < currentQ)      d.className = 'dot done';
-    else if (i === currentQ) d.className = 'dot active';
-    else                   d.className = 'dot upcoming';
+  for (let i = 0; i < QUESTIONS.length; i++) {
+    const d = document.createElement('div');
+    d.className = i < currentQ ? 'dot done' : i === currentQ ? 'dot active' : 'dot upcoming';
     const qi = i;
-    d.addEventListener('click', () => { if (qi <= currentQ || answered) goToQuestion(qi); });
+    d.addEventListener('click', () => { if (qi <= currentQ || answers[qi] !== undefined) goToQuestion(qi); });
     area.appendChild(d);
   }
 }
 
-function goToQuestion(i) {
-  currentQ = i;
-  renderQuestion();
-}
+function goToQuestion(i) { currentQ = i; renderQuestion(); }
 
 function selectAnswer(val) {
   answers[currentQ] = val;
-  ['btnAgree','btnNeutral','btnDisagree'].forEach(id =>
-    document.getElementById(id).classList.remove('sel')
-  );
-  if (val === 2) document.getElementById('btnAgree').classList.add('sel');
-  else if (val === 1) document.getElementById('btnNeutral').classList.add('sel');
+  ['btnAgree','btnNeutral','btnDisagree'].forEach(id => document.getElementById(id).classList.remove('sel'));
+  if (val===2) document.getElementById('btnAgree').classList.add('sel');
+  else if (val===1) document.getElementById('btnNeutral').classList.add('sel');
   else document.getElementById('btnDisagree').classList.add('sel');
-
-  // auto-advance after short delay
   setTimeout(() => {
-    if (currentQ < QUESTIONS.length - 1) { currentQ++; renderQuestion(); }
+    if (currentQ < QUESTIONS.length-1) { currentQ++; renderQuestion(); }
     else showResults();
-  }, 320);
+  }, 300);
 }
 
 function skipQuestion() {
-  answers[currentQ] = null; // skipped = treat as neutral
-  if (currentQ < QUESTIONS.length - 1) { currentQ++; renderQuestion(); }
+  answers[currentQ] = null;
+  if (currentQ < QUESTIONS.length-1) { currentQ++; renderQuestion(); }
   else showResults();
 }
 
-function restartQuiz() {
-  currentQ = 0;
-  answers  = {};
-  showScreen('screenStart');
-}
+function restartQuiz() { currentQ = 0; answers = {}; showScreen('screenStart'); }
 
 /* ── RESULTS ─────────────────────────────────────────────── */
 function computeMatches() {
-  return BREEDS.map(breed => {
+  const n = QUESTIONS.length;
+  return BREEDS.map(b => {
     let dist = 0;
-    QUESTIONS.forEach((q, i) => {
-      const user  = (answers[i] !== undefined && answers[i] !== null) ? answers[i] : 1;
-      const ideal = breed.ideal[q.key];
-      dist += Math.abs(user - ideal);
-    });
-    const pct = Math.round((1 - dist / (QUESTIONS.length * 2)) * 100);
-    return { ...breed, pct };
-  }).sort((a, b) => b.pct - a.pct);
+    for (let i = 0; i < n; i++) {
+      const u = (answers[i] !== undefined && answers[i] !== null) ? answers[i] : 1;
+      dist += Math.abs(u - b.ideal[i]);
+    }
+    return { ...b, pct: Math.round((1 - dist / (n*2)) * 100) };
+  }).sort((a,b) => b.pct - a.pct);
 }
 
 function showResults() {
-  const ranked = computeMatches();
-  const top    = ranked[0];
-
-  document.getElementById('topMatchLine').textContent =
-    `Deine Katze: ${top.name} — ${top.pct}% Übereinstimmung`;
+  const ranked = computeMatches(), top = ranked[0];
+  document.getElementById('topMatchLine').textContent = `Deine Katze: ${top.name} — ${top.pct}% Übereinstimmung`;
   document.getElementById('topMatchDesc').textContent = top.desc;
-  document.getElementById('topMatchImg').src = BREED_IMG[top.name] || '';
+  document.getElementById('topMatchImg').src = breedImg(top.name);
   document.getElementById('topMatchImg').alt = top.name;
 
+  const box = document.getElementById('hinweisBox');
+  document.getElementById('hinweisText').textContent = top.note || '';
+  box.classList.toggle('visible', !!top.note);
+
   const list = document.getElementById('breedList');
-  list.innerHTML = ranked.map((r, i) => `
+  list.innerHTML = ranked.map((r,i) => `
     <div class="breed-row">
       <div class="breed-info">
-        <div class="breed-thumb"><img src="${BREED_IMG[r.name]}" alt="${r.name}" loading="lazy"></div>
+        <div class="breed-thumb"><img src="${breedImg(r.name)}" alt="${r.name}" loading="lazy"></div>
         <div>
           <div class="breed-name">${r.name}</div>
-          <div class="breed-tag">${r.tag}</div>
+          <div class="breed-tag">${r.desc.slice(0,50)}…</div>
+          ${r.note ? '<div class="breed-note-tag">Hinweis</div>' : ''}
         </div>
       </div>
       <div class="bar-track">
-        <div class="bar-fill ${i > 2 ? 'dim' : ''}" data-w="${r.pct}"></div>
+        <div class="bar-fill ${i>4?'dim':''}" data-w="${r.pct}"></div>
       </div>
-      <div class="pct-label ${i > 2 ? 'dim' : ''}">${r.pct}%</div>
+      <div class="pct-label ${i>4?'dim':''}">${r.pct}%</div>
     </div>`).join('');
 
   showScreen('screenResults');
-
-  // animate bars
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      list.querySelectorAll('.bar-fill').forEach((bar, i) => {
-        bar.style.transitionDelay = `${i * 55}ms`;
-        bar.style.width = bar.dataset.w + '%';
-      });
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    list.querySelectorAll('.bar-fill').forEach((bar,i) => {
+      bar.style.transitionDelay = `${i*28}ms`;
+      bar.style.width = bar.dataset.w + '%';
     });
-  });
+  }));
 }
 </script>
 </body>
