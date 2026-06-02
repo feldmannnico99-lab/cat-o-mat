@@ -356,6 +356,18 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
+
+    /* ── CAT PAW CURSOR (desktop only) ──────────── */
+    @media (pointer: fine) {
+      /* open paw */
+      html {
+        cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='21' rx='7.5' ry='7' fill='white' stroke='%23444' stroke-width='1.2'/%3E%3Cellipse cx='6.5' cy='12' rx='3.2' ry='3.8' fill='white' stroke='%23444' stroke-width='1.2'/%3E%3Cellipse cx='12' cy='8.5' rx='3.2' ry='3.8' fill='white' stroke='%23444' stroke-width='1.2'/%3E%3Cellipse cx='19' cy='8' rx='3.2' ry='3.8' fill='white' stroke='%23444' stroke-width='1.2'/%3E%3Cellipse cx='25' cy='12' rx='3.2' ry='3.8' fill='white' stroke='%23444' stroke-width='1.2'/%3E%3C/svg%3E") 16 16, auto;
+      }
+      /* grabbing paw on click */
+      html.paw-grab {
+        cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='22' rx='7.5' ry='6.5' fill='white' stroke='%23444' stroke-width='1.2'/%3E%3Cellipse cx='8' cy='15' rx='3' ry='3.6' transform='rotate(18 8 15)' fill='white' stroke='%23444' stroke-width='1.2'/%3E%3Cellipse cx='13' cy='12' rx='3' ry='3.6' transform='rotate(7 13 12)' fill='white' stroke='%23444' stroke-width='1.2'/%3E%3Cellipse cx='19' cy='12' rx='3' ry='3.6' transform='rotate(-7 19 12)' fill='white' stroke='%23444' stroke-width='1.2'/%3E%3Cellipse cx='24' cy='15' rx='3' ry='3.6' transform='rotate(-18 24 15)' fill='white' stroke='%23444' stroke-width='1.2'/%3E%3Cline x1='8' y1='12' x2='5.5' y2='8' stroke='white' stroke-width='1.5' stroke-linecap='round'/%3E%3Cline x1='13' y1='9' x2='12' y2='5' stroke='white' stroke-width='1.5' stroke-linecap='round'/%3E%3Cline x1='19' y1='9' x2='20' y2='5' stroke='white' stroke-width='1.5' stroke-linecap='round'/%3E%3Cline x1='24' y1='12' x2='26.5' y2='8' stroke='white' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") 16 16, auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -416,8 +428,8 @@
   <div class="spacer-top"></div>
 
   <div class="title-area">
-    <div class="main-title">Cat-o-mat<sup style="font-size:0.45em;vertical-align:super">®</sup></div>
-    <div class="main-subtitle">Finde deine Traumkatze</div>
+    <div class="main-title">Cat-o-mat</div>
+    <div class="main-subtitle">Finde Deinen Buddy</div>
   </div>
 
   <!-- START -->
@@ -614,6 +626,23 @@ const BREED_IMG = {
   "Peterbald":"assets/cat-sphynx.webp","Cornish Rex":"assets/cat-sphynx.webp",
   "Devon Rex":"assets/cat-sphynx.webp","German Rex":"assets/cat-sphynx.webp",
   "Lykoi":"assets/cat-sphynx.webp",
+  // eigene Bilder für alle bisher fehlenden Rassen
+  "American Curl":"assets/cat-american-curl.webp",
+  "American Wirehair":"assets/cat-american-wirehair.webp",
+  "Burmilla":"assets/cat-burmilla.webp",
+  "Glückskatzen":"assets/cat-gluckskatzen.webp",
+  "Havana Katze":"assets/cat-havana.webp",
+  "Japanese Bobtail":"assets/cat-japanese-bobtail.webp",
+  "Khao Manee":"assets/cat-khao-manee.webp",
+  "Koratkatze":"assets/cat-korat.webp",
+  "Kurilen Bobtail":"assets/cat-kurilen-bobtail.webp",
+  "Manx":"assets/cat-manx.webp",
+  "Munchkin-Katze":"assets/cat-munchkin.webp",
+  "Pixiebob":"assets/cat-pixiebob.webp",
+  "Scottish Fold":"assets/cat-scottish-fold.webp",
+  "Selkirk Rex":"assets/cat-selkirk-rex.webp",
+  "Singapura":"assets/cat-singapura.webp",
+  "Tuxedo-Katzen":"assets/cat-tuxedo.webp",
 };
 function breedImg(n) { return BREED_IMG[n] || "assets/cat-start.webp"; }
 
@@ -941,6 +970,10 @@ document.getElementById('breedModal').addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeBreedModal();
 });
+
+// Cat paw cursor — grab on mousedown, release on mouseup
+document.addEventListener('mousedown', () => document.documentElement.classList.add('paw-grab'));
+document.addEventListener('mouseup',   () => document.documentElement.classList.remove('paw-grab'));
 </script>
 </body>
 </html>
