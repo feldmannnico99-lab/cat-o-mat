@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cat-o-mat®</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --white: #ffffff;
+      --black: #000000;
+      --gray:  rgba(255,255,255,0.35);
+    }
+
+    html, body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── LAYOUT ─────────────────────────────────── */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 20px 60px;
+    }
+
+    /* ── HEADER ─────────────────────────────────── */
+    .topbar {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      justify-content: flex-end;
+      padding: 28px 0 0;
+    }
+
+    .burger {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .burger span {
+      display: block;
+      width: 28px;
+      height: 2px;
+      background: white;
+    }
+
+    /* ── TITLE AREA ──────────────────────────────── */
+    .title-area {
+      text-align: center;
+      padding: 32px 0 40px;
+    }
+
+    .main-title {
+      font-size: clamp(60px, 11vw, 130px);
+      font-weight: 900;
+      line-height: 0.92;
+      letter-spacing: -2px;
+    }
+
+    .main-subtitle {
+      font-size: clamp(16px, 2.2vw, 22px);
+      font-weight: 600;
+      margin-top: 14px;
+      letter-spacing: 0.1px;
+    }
+
+    /* ── SCREENS ─────────────────────────────────── */
+    .screen { display: none; width: 100%; max-width: 1000px; }
+    .screen.active { display: block; animation: appear .22s ease both; }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── CARD ────────────────────────────────────── */
+    .card {
+      border: 1.5px solid var(--white);
+      background: var(--black);
+      padding: 36px 44px 32px;
+      position: relative;
+    }
+
+    /* speech bubble tail */
+    .card-tail {
+      position: absolute;
+      bottom: -1px;
+      left: 52px;
+      width: 0;
+      height: 0;
+      border-left: 13px solid transparent;
+      border-right: 13px solid transparent;
+      border-top: 18px solid var(--white);
+      transform: translateY(100%);
+    }
+
+    /* ── START CARD ──────────────────────────────── */
+    .start-label {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+      opacity: 0.6;
+    }
+
+    .start-text {
+      font-size: clamp(18px, 2.5vw, 26px);
+      font-weight: 500;
+      line-height: 1.45;
+      max-width: 620px;
+      margin-bottom: 36px;
+    }
+
+    .start-meta {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 36px;
+    }
+
+    .start-meta-item strong {
+      display: block;
+      font-size: 32px;
+      font-weight: 800;
+    }
+
+    .start-meta-item span {
+      font-size: 13px;
+      opacity: 0.55;
+      font-weight: 500;
+    }
+
+    /* ── QUESTION CARD ───────────────────────────── */
+    .q-header {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 22px;
+      letter-spacing: 0.1px;
+    }
+
+    .q-text {
+      font-size: clamp(20px, 3vw, 32px);
+      font-weight: 500;
+      line-height: 1.3;
+      margin-bottom: 36px;
+      max-width: 700px;
+    }
+
+    .q-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .ans-group {
+      display: flex;
+      gap: 0;
+    }
+
+    .ans-btn {
+      border: 1.5px solid var(--white);
+      background: var(--black);
+      color: var(--white);
+      padding: 11px 26px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .12s, color .12s;
+      margin-right: -1.5px; /* collapse borders */
+      position: relative;
+    }
+
+    .ans-btn:first-child { border-radius: 0; }
+    .ans-btn:last-child  { margin-right: 0; }
+
+    .ans-btn:hover {
+      background: rgba(255,255,255,0.1);
+      z-index: 1;
+    }
+
+    .ans-btn.sel {
+      background: var(--white);
+      color: var(--black);
+      z-index: 2;
+    }
+
+    .skip-btn {
+      background: none;
+      border: none;
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      opacity: 0.7;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity .15s;
+      white-space: nowrap;
+    }
+
+    .skip-btn:hover { opacity: 1; }
+
+    /* ── DOT NAVIGATION ──────────────────────────── */
+    .dots-area {
+      margin-top: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+      padding-left: 52px; /* align tail with first dot */
+    }
+
+    .dot {
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all .18s ease;
+      flex-shrink: 0;
+    }
+
+    .dot.done    { width: 9px;  height: 9px;  background: rgba(255,255,255,0.55); }
+    .dot.active  { width: 14px; height: 14px; border: 2px solid white; background: transparent; }
+    .dot.upcoming{ width: 9px;  height: 9px;  background: rgba(255,255,255,0.2); }
+
+    /* ── CAT IMAGES ─────────────────────────────── */
+    .cat-img {
+      display: block;
+      filter: invert(1);
+    }
+
+    /* Start card split layout */
+    .start-card {
+      padding: 0;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .start-card-body {
+      flex: 1;
+      padding: 36px 44px 32px;
+    }
+
+    .start-card-img {
+      width: 210px;
+      flex-shrink: 0;
+      border-left: 1.5px solid rgba(255,255,255,0.18);
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .start-card-img img {
+      width: 100%;
+      display: block;
+      filter: invert(1);
+    }
+
+    /* ── RESULTS ─────────────────────────────────── */
+    .results-label {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+      opacity: 0.6;
+    }
+
+    .top-match-hero {
+      display: flex;
+      align-items: flex-start;
+      gap: 28px;
+      margin-bottom: 36px;
+    }
+
+    .top-match-img {
+      width: 160px;
+      flex-shrink: 0;
+    }
+
+    .top-match-img img {
+      width: 100%;
+      display: block;
+      filter: invert(1);
+    }
+
+    .top-match-line {
+      font-size: clamp(20px, 3vw, 32px);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .top-match-desc {
+      font-size: 15px;
+      font-weight: 400;
+      opacity: 0.7;
+      line-height: 1.6;
+      max-width: 560px;
+    }
+
+    /* Results list */
+    .breed-row {
+      display: grid;
+      grid-template-columns: 220px 1fr 64px;
+      gap: 16px 20px;
+      align-items: center;
+      padding: 14px 0;
+      border-top: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .breed-row:last-child { border-bottom: 1px solid rgba(255,255,255,0.12); }
+
+    .breed-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .breed-thumb {
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .breed-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: invert(1);
+      display: block;
+    }
+
+    .breed-name {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .breed-tag {
+      font-size: 11px;
+      opacity: 0.5;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .bar-track {
+      height: 3px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: white;
+      border-radius: 2px;
+      width: 0%;
+      transition: width .9s cubic-bezier(0.22,1,0.36,1);
+    }
+
+    .bar-fill.dim { background: rgba(255,255,255,0.35); }
+
+    .pct-label {
+      font-size: 17px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .pct-label.dim { opacity: 0.4; }
+
+    /* ── BUTTONS ─────────────────────────────────── */
+    .btn-white {
+      border: 1.5px solid white;
+      background: black;
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 12px 30px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background .15s, color .15s;
+    }
+
+    .btn-white:hover {
+      background: white;
+      color: black;
+    }
+
+    .btn-white-filled {
+      border: 1.5px solid white;
+      background: white;
+      color: black;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 12px 30px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background .15s, color .15s;
+    }
+
+    .btn-white-filled:hover {
+      background: black;
+      color: white;
+    }
+
+    .card-footer {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.18);
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────── */
+    @media (max-width: 600px) {
+      .card { padding: 24px 20px 22px; }
+      .start-card { flex-direction: column; }
+      .start-card-body { padding: 24px 20px 22px; }
+      .start-card-img { width: 100%; height: 180px; border-left: none; border-top: 1.5px solid rgba(255,255,255,0.18); align-items: center; justify-content: center; }
+      .start-card-img img { width: 180px; height: 180px; object-fit: contain; }
+      .ans-group { flex-wrap: wrap; }
+      .ans-btn { margin-right: 0; margin-bottom: -1.5px; width: 100%; }
+      .start-meta { gap: 24px; }
+      .top-match-hero { flex-direction: column; align-items: center; text-align: center; }
+      .top-match-img { width: 140px; }
+      .breed-row { grid-template-columns: 1fr 40px; }
+      .breed-thumb { width: 36px; height: 36px; }
+      .bar-track { display: none; }
+      .dots-area { padding-left: 20px; flex-wrap: wrap; gap: 5px; }
+      .card-tail { left: 20px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="burger" aria-label="Menü">
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <div class="title-area">
+    <div class="main-title">Cat-o-mat<sup style="font-size:0.45em;vertical-align:super">®</sup></div>
+    <div class="main-subtitle">Finde deine Traumkatze</div>
+  </div>
+
+  <!-- ── START ───────────────────────────────── -->
+  <div class="screen active" id="screenStart">
+    <div class="card start-card">
+      <div class="card-tail"></div>
+      <div class="start-card-body">
+        <div class="start-label">Willkommen</div>
+        <div class="start-text">
+          Beantworte 12 kurze Fragen zu deinem Lebensstil und erfahre, welche Katzenrasse am besten zu dir passt.
+        </div>
+        <div class="start-meta">
+          <div class="start-meta-item">
+            <strong>12</strong>
+            <span>Fragen</span>
+          </div>
+          <div class="start-meta-item">
+            <strong>8</strong>
+            <span>Katzenrassen</span>
+          </div>
+          <div class="start-meta-item">
+            <strong>3 min</strong>
+            <span>Dauer</span>
+          </div>
+        </div>
+        <button class="btn-white-filled" onclick="startQuiz()">
+          Jetzt starten
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="start-card-img">
+        <img src="assets/cat-start.webp" alt="Katze" loading="lazy">
+      </div>
+    </div>
+    <div class="dots-area">
+      <!-- 12 upcoming dots as preview -->
+      <script>
+        for (let i = 0; i < 12; i++) document.write('<div class="dot upcoming"></div>');
+      </script>
+    </div>
+  </div>
+
+  <!-- ── QUESTION ─────────────────────────────── -->
+  <div class="screen" id="screenQuestion">
+    <div class="card">
+      <div class="card-tail"></div>
+      <div class="q-header" id="qHeader">1/12 Aktivität</div>
+      <div class="q-text"   id="qText"></div>
+      <div class="q-actions">
+        <div class="ans-group">
+          <button class="ans-btn" id="btnAgree"    onclick="selectAnswer(2)">stimme zu</button>
+          <button class="ans-btn" id="btnNeutral"  onclick="selectAnswer(1)">neutral</button>
+          <button class="ans-btn" id="btnDisagree" onclick="selectAnswer(0)">stimme nicht zu</button>
+        </div>
+        <button class="skip-btn" onclick="skipQuestion()">
+          These überspringen
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="dots-area" id="dotsArea"></div>
+  </div>
+
+  <!-- ── RESULTS ───────────────────────────────── -->
+  <div class="screen" id="screenResults">
+    <div class="card">
+      <div class="card-tail"></div>
+      <div class="results-label">Dein Ergebnis</div>
+      <div class="top-match-hero">
+        <div class="top-match-img"><img id="topMatchImg" src="" alt="" loading="lazy"></div>
+        <div>
+          <div class="top-match-line" id="topMatchLine"></div>
+          <div class="top-match-desc" id="topMatchDesc"></div>
+        </div>
+      </div>
+      <div id="breedList"></div>
+      <div class="card-footer">
+        <button class="btn-white" onclick="restartQuiz()">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8a6 6 0 1 1 1.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M2 12V8h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Neu starten
+        </button>
+      </div>
+    </div>
+    <div class="dots-area">
+      <script>
+        for (let i = 0; i < 12; i++) document.write('<div class="dot done"></div>');
+      </script>
+    </div>
+  </div>
+
+</div><!-- .page -->
+
+<script>
+/* ── DATA ────────────────────────────────────────────────── */
+
+const QUESTIONS = [
+  { text: "Ich führe einen aktiven, bewegungsreichen Alltag.",                     label: "Aktivität",     key: "activity"   },
+  { text: "Ich kann täglich viel Zeit mit meiner Katze verbringen.",               label: "Zeit",          key: "time"       },
+  { text: "Körperkontakt und Kuscheligkeit mit meiner Katze sind mir sehr wichtig.",label: "Kuscheligkeit", key: "cuddly"     },
+  { text: "Ich habe bereits Erfahrung in der Katzenhaltung.",                      label: "Erfahrung",     key: "experience" },
+  { text: "Ich lebe in einem Haus mit Garten oder habe generell viel Platz.",      label: "Wohnraum",      key: "space"      },
+  { text: "Ich mag Katzen, die viel kommunizieren und lautstark miauzen.",         label: "Kommunikation", key: "vocal"      },
+  { text: "Eine pflegeleichte Katze mit wenig Fellpflege-Aufwand ist mir wichtig.",label: "Fellpflege",    key: "grooming"   },
+  { text: "Meine Katze soll sehr menschenbezogen und anhänglich sein.",            label: "Bindung",       key: "social"     },
+  { text: "Bei mir zuhause leben auch Kinder oder andere Haustiere.",              label: "Familie",       key: "kids"       },
+  { text: "Ein besonderes oder auffälliges Äußeres meiner Katze ist mir wichtig.", label: "Optik",         key: "look"       },
+  { text: "Ich bin den Großteil des Tages zu Hause.",                              label: "Zuhause",       key: "home"       },
+  { text: "Ich mag Katzen, die gern klettern und viel Bewegungsraum brauchen.",    label: "Sportlichkeit", key: "athletic"   }
+];
+
+const BREEDS = [
+  {
+    name: "Maine Coon",
+    tag: "Groß, freundlich, waldkatzenartig",
+    desc: "Die Maine Coon ist eine der größten Hauskatzen mit einem treuen, hundeähnlichen Wesen. Verspielt, intelligent, kinderfreundlich — und ihr dichtes Fell braucht regelmäßige Pflege.",
+    ideal: { activity:2, time:2, cuddly:2, experience:1, space:2, vocal:1, grooming:0, social:2, kids:2, look:2, home:1, athletic:2 }
+  },
+  {
+    name: "Perser",
+    tag: "Ruhig, sanftmütig, pflegeintensiv",
+    desc: "Die Perser ist sanft und liebt es zu schmusen und zu dösen. Ihr langes, seidiges Fell erfordert tägliche Pflege. Ideal für entspannte Haushalte ohne Hektik.",
+    ideal: { activity:0, time:2, cuddly:2, experience:1, space:0, vocal:0, grooming:0, social:2, kids:1, look:2, home:2, athletic:0 }
+  },
+  {
+    name: "Britisch Kurzhaar",
+    tag: "Ausgeglichen, unabhängig, robust",
+    desc: "Die Britisch Kurzhaar ist entspannt und pflegeleicht. Sie kommt gut mit dem Alleinsein zurecht und ist ein unkomplizierter Begleiter für vielbeschäftigte Menschen.",
+    ideal: { activity:1, time:0, cuddly:1, experience:0, space:0, vocal:0, grooming:2, social:1, kids:2, look:1, home:0, athletic:0 }
+  },
+  {
+    name: "Siamkatze",
+    tag: "Temperamentvoll, gesprächig, anhänglich",
+    desc: "Die Siamkatze ist laut, liebevoll und absolut menschenbezogen. Sie miaut viel, ist hochintelligent und hasst Einsamkeit. Perfekt für kommunikative Menschen.",
+    ideal: { activity:2, time:2, cuddly:2, experience:1, space:0, vocal:2, grooming:2, social:2, kids:1, look:1, home:2, athletic:2 }
+  },
+  {
+    name: "Bengalkatze",
+    tag: "Wild, sportlich, spektakulär",
+    desc: "Die Bengalkatze sieht aus wie ein kleiner Leopard. Sie braucht viel Beschäftigung und Platz. Für erfahrene Halter, die Energie und ein einzigartiges Aussehen schätzen.",
+    ideal: { activity:2, time:2, cuddly:1, experience:2, space:2, vocal:1, grooming:2, social:1, kids:1, look:2, home:0, athletic:2 }
+  },
+  {
+    name: "Ragdoll",
+    tag: "Sanft, entspannt, absolutes Schmusekind",
+    desc: "Die Ragdoll ist das ruhigste Schmusekind — sie erschlafft beim Aufnehmen wie eine Stoffpuppe. Absolut kinderfreundlich, ideal für Menschen, die viel Zeit zu Hause sind.",
+    ideal: { activity:0, time:2, cuddly:2, experience:0, space:0, vocal:0, grooming:1, social:2, kids:2, look:2, home:2, athletic:0 }
+  },
+  {
+    name: "Abessinier",
+    tag: "Neugierig, aktiv, elegant",
+    desc: "Der Abessinier ist eine der ältesten Rassen — athletisch, elegant und ungemein neugierig. Er erkundet alles und braucht viel Beschäftigung. Für aktive, erfahrene Halter.",
+    ideal: { activity:2, time:1, cuddly:1, experience:2, space:1, vocal:1, grooming:2, social:1, kids:1, look:1, home:0, athletic:2 }
+  },
+  {
+    name: "Sphynx",
+    tag: "Haarlos, wärmesuchend, anhänglich",
+    desc: "Die Sphynx ist trotz ihres ungewöhnlichen Aussehens extrem schmusig — sie sucht ständig Körperwärme. Verspielt, social und ein echter Hingucker für mutige Katzenliebhaber.",
+    ideal: { activity:1, time:2, cuddly:2, experience:2, space:0, vocal:1, grooming:1, social:2, kids:1, look:2, home:2, athletic:1 }
+  }
+];
+
+/* ── BREED IMAGES ────────────────────────────────────────── */
+const BREED_IMG = {
+  "Maine Coon":        'assets/cat-maine-coon.webp',
+  "Perser":            'assets/cat-perser.webp',
+  "Britisch Kurzhaar": 'assets/cat-bkh.webp',
+  "Siamkatze":         'assets/cat-siam.webp',
+  "Bengalkatze":       'assets/cat-bengal.webp',
+  "Ragdoll":           'assets/cat-ragdoll.webp',
+  "Abessinier":        'assets/cat-abessinier.webp',
+  "Sphynx":            'assets/cat-sphynx.webp',
+};
+
+/* ── STATE ───────────────────────────────────────────────── */
+let currentQ = 0;
+let answers  = {}; // index → 0|1|2|null (null = skipped)
+
+/* ── HELPERS ─────────────────────────────────────────────── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
+  const el = document.getElementById(id);
+  el.style.display = 'block';
+  requestAnimationFrame(() => el.classList.add('active'));
+}
+
+/* ── QUIZ ────────────────────────────────────────────────── */
+function startQuiz() {
+  currentQ = 0;
+  answers  = {};
+  renderQuestion();
+  showScreen('screenQuestion');
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const n = QUESTIONS.length;
+
+  document.getElementById('qHeader').textContent = `${currentQ + 1}/${n} ${q.label}`;
+  document.getElementById('qText').textContent   = q.text;
+
+  ['btnAgree','btnNeutral','btnDisagree'].forEach(id =>
+    document.getElementById(id).classList.remove('sel')
+  );
+
+  const saved = answers[currentQ];
+  if (saved === 2) document.getElementById('btnAgree').classList.add('sel');
+  else if (saved === 1) document.getElementById('btnNeutral').classList.add('sel');
+  else if (saved === 0) document.getElementById('btnDisagree').classList.add('sel');
+
+  renderDots();
+}
+
+function renderDots() {
+  const area = document.getElementById('dotsArea');
+  const n    = QUESTIONS.length;
+  area.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const d  = document.createElement('div');
+    const answered = answers[i] !== undefined;
+    if (i < currentQ)      d.className = 'dot done';
+    else if (i === currentQ) d.className = 'dot active';
+    else                   d.className = 'dot upcoming';
+    const qi = i;
+    d.addEventListener('click', () => { if (qi <= currentQ || answered) goToQuestion(qi); });
+    area.appendChild(d);
+  }
+}
+
+function goToQuestion(i) {
+  currentQ = i;
+  renderQuestion();
+}
+
+function selectAnswer(val) {
+  answers[currentQ] = val;
+  ['btnAgree','btnNeutral','btnDisagree'].forEach(id =>
+    document.getElementById(id).classList.remove('sel')
+  );
+  if (val === 2) document.getElementById('btnAgree').classList.add('sel');
+  else if (val === 1) document.getElementById('btnNeutral').classList.add('sel');
+  else document.getElementById('btnDisagree').classList.add('sel');
+
+  // auto-advance after short delay
+  setTimeout(() => {
+    if (currentQ < QUESTIONS.length - 1) { currentQ++; renderQuestion(); }
+    else showResults();
+  }, 320);
+}
+
+function skipQuestion() {
+  answers[currentQ] = null; // skipped = treat as neutral
+  if (currentQ < QUESTIONS.length - 1) { currentQ++; renderQuestion(); }
+  else showResults();
+}
+
+function restartQuiz() {
+  currentQ = 0;
+  answers  = {};
+  showScreen('screenStart');
+}
+
+/* ── RESULTS ─────────────────────────────────────────────── */
+function computeMatches() {
+  return BREEDS.map(breed => {
+    let dist = 0;
+    QUESTIONS.forEach((q, i) => {
+      const user  = (answers[i] !== undefined && answers[i] !== null) ? answers[i] : 1;
+      const ideal = breed.ideal[q.key];
+      dist += Math.abs(user - ideal);
+    });
+    const pct = Math.round((1 - dist / (QUESTIONS.length * 2)) * 100);
+    return { ...breed, pct };
+  }).sort((a, b) => b.pct - a.pct);
+}
+
+function showResults() {
+  const ranked = computeMatches();
+  const top    = ranked[0];
+
+  document.getElementById('topMatchLine').textContent =
+    `Deine Katze: ${top.name} — ${top.pct}% Übereinstimmung`;
+  document.getElementById('topMatchDesc').textContent = top.desc;
+  document.getElementById('topMatchImg').src = BREED_IMG[top.name] || '';
+  document.getElementById('topMatchImg').alt = top.name;
+
+  const list = document.getElementById('breedList');
+  list.innerHTML = ranked.map((r, i) => `
+    <div class="breed-row">
+      <div class="breed-info">
+        <div class="breed-thumb"><img src="${BREED_IMG[r.name]}" alt="${r.name}" loading="lazy"></div>
+        <div>
+          <div class="breed-name">${r.name}</div>
+          <div class="breed-tag">${r.tag}</div>
+        </div>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill ${i > 2 ? 'dim' : ''}" data-w="${r.pct}"></div>
+      </div>
+      <div class="pct-label ${i > 2 ? 'dim' : ''}">${r.pct}%</div>
+    </div>`).join('');
+
+  showScreen('screenResults');
+
+  // animate bars
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      list.querySelectorAll('.bar-fill').forEach((bar, i) => {
+        bar.style.transitionDelay = `${i * 55}ms`;
+        bar.style.width = bar.dataset.w + '%';
+      });
+    });
+  });
+}
+</script>
+</body>
+</html>
