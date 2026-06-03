@@ -207,8 +207,14 @@
     .breed-thumb { width: 46px; height: 46px; flex-shrink: 0; overflow: hidden; }
     .breed-thumb img { width: 100%; height: 100%; object-fit: contain; filter: invert(1) grayscale(1); display: block; }
     .breed-name { font-size: 14px; font-weight: 700; }
+    .breed-name-link { color: #fff; text-decoration: underline; text-underline-offset: 2px; display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; }
+    .breed-name-link svg { opacity: 0.5; flex-shrink: 0; transition: opacity .15s; }
+    .breed-name-link:hover svg { opacity: 1; }
     .breed-tag  { font-size: 11px; opacity: 0.45; font-weight: 500; margin-top: 1px; }
-    .breed-note-tag { font-size: 10px; font-weight: 700; border: 1px solid rgba(255,255,255,0.4); padding: 1px 5px; margin-top: 3px; display: inline-block; letter-spacing: 0.3px; opacity: 0.7; border-radius: 3px; }
+    .breed-note-tag { font-size: 10px; font-weight: 700; border: 1px solid rgba(255,255,255,0.4); padding: 1px 5px; margin-top: 3px; display: inline-flex; align-items: center; gap: 3px; letter-spacing: 0.3px; opacity: 0.7; border-radius: 3px; cursor: pointer; background: none; color: #fff; font-family: 'Outfit', sans-serif; transition: opacity .15s; }
+    .breed-note-tag:hover { opacity: 1; }
+    .breed-note-expand { grid-column: 1 / -1; display: none; padding: 8px 12px; border: 1px dashed rgba(255,255,255,0.4); font-size: 13px; font-weight: 500; line-height: 1.5; opacity: 0.85; border-radius: 8px; margin-top: -4px; margin-bottom: 4px; }
+    .breed-note-expand.visible { display: block; }
     .bar-track { height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
     .bar-fill  { height: 100%; background: white; border-radius: 2px; width: 0%; transition: width .9s cubic-bezier(0.22,1,0.36,1); }
     .bar-fill.dim { background: rgba(255,255,255,0.3); }
@@ -1128,13 +1134,20 @@ function showResults() {
       <div class="breed-info">
         <div class="breed-thumb"><img src="${breedImg(r.name)}" alt="${r.name}" loading="lazy"></div>
         <div>
-          <div class="breed-name">${r.name}</div>
+          <a href="https://www.google.com/search?q=Katzenrasse+${encodeURIComponent(r.name)}" target="_blank" rel="noopener" class="breed-name-link">
+            ${r.name}
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 8.5L8.5 1.5M8.5 1.5H4M8.5 1.5V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
           <div class="breed-tag">${r.desc.slice(0,50)}…</div>
-          ${r.note?'<div class="breed-note-tag">Hinweis</div>':''}
+          ${r.note ? `<button class="breed-note-tag" onclick="toggleBreedNote(this)">
+            <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><circle cx="4.5" cy="4.5" r="3.75" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 4V6M4.5 3h.005" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Hinweis
+          </button>` : ''}
         </div>
       </div>
       <div class="bar-track"><div class="bar-fill ${i>4?'dim':''}" data-w="${r.pct}"></div></div>
       <div class="pct-label ${i>4?'dim':''}">${r.pct}%</div>
+      ${r.note ? `<div class="breed-note-expand">${r.note}</div>` : ''}
     </div>`).join('');
 
   showScreen('screenResults');
@@ -1144,6 +1157,12 @@ function showResults() {
       bar.style.width = bar.dataset.w+'%';
     });
   }));
+}
+
+function toggleBreedNote(btn) {
+  const box = btn.closest('.breed-row').querySelector('.breed-note-expand');
+  const open = box.classList.toggle('visible');
+  btn.querySelector('svg').style.transform = open ? 'rotate(180deg)' : '';
 }
 
 /* ── GALLERY ─────────────────────────────────────────────── */
