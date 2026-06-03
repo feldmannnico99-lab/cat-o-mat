@@ -85,3 +85,29 @@ Fires `trackVisit()` on every page load (once per `sessionStorage` key per day).
 - **Cat paw cursor** (desktop only, `@media (pointer: fine)`): SVG data-URL open paw; `html.paw-grab` class swaps to grabbing paw on `mousedown`.
 - **All images**: `filter: invert(1) grayscale(1)` — mandatory for B&W consistency.
 - **Important breed notes** (e.g., Bengalkatze genehmigungspflichtig, Perser brachycephaly): stored in `breed.note`, shown as a dashed `hinweis-box` in results and gallery modal.
+
+---
+
+## Results screen features
+
+- **Breed name links**: each `.breed-name-link` is an `<a>` opening `https://www.google.com/search?q=Katzenrasse+{encodeURIComponent(name)}` in a new tab. White, underlined, with a small ↗ SVG icon.
+- **Hinweis expand**: breeds with `note` show a `<button class="breed-note-tag">` with an ⓘ SVG. Clicking calls `toggleBreedNote(btn)` which toggles `.visible` on the sibling `.breed-note-expand` div (spans `grid-column: 1/-1` inside the breed-row grid).
+
+---
+
+## Replacing / regenerating assets
+
+When a cat image has unwanted text, wrong colors, or needs replacement:
+
+1. Generate new image via Higgsfield (`nano_banana_pro` model, `aspect_ratio: "1:1"`, prompt: `"minimalist black and white illustration of a [breed] cat, ... clean lineart, no text, no labels, no watermarks, white background, B&W only"`).
+2. Wait for job to complete (`job_status` with `sync: true`), get the PNG URL from `results.rawUrl`.
+3. Convert PNG → WebP and save to `assets/` using Node + sharp (no system tools available):
+```bash
+cd /tmp && npm install sharp
+node -e "
+const sharp = require('/tmp/node_modules/sharp');
+const https = require('https');
+// fetch PNG buffer, then: sharp(buf).webp({ quality: 90 }).toFile('assets/cat-xxx.webp')
+"
+```
+The existing `.webp` files are proper VP8 WebP — don't save raw PNGs with a `.webp` extension.
