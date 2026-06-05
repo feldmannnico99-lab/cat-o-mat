@@ -205,10 +205,9 @@
     .logo-cloud-item img { height: 52px; width: auto; max-width: 180px; display: block; filter: invert(1) grayscale(1); object-fit: contain; opacity: 0.55; transition: opacity 0.22s ease; }
     .logo-cloud-item:hover img { opacity: 1; }
     @media (max-width: 600px) {
-      .logo-cloud { flex-direction: column; align-items: flex-start; gap: 18px; }
-      .logo-cloud-label { width: auto; padding-right: 0; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.18); padding-bottom: 14px; text-align: left; }
-      .logo-cloud-slider-wrap { width: 100%; }
-      .logo-cloud-item img { height: 38px; max-width: 130px; }
+      .logo-cloud-label { width: 80px; padding-right: 14px; font-size: 10px; }
+      .logo-cloud-slider-wrap { -webkit-mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent); }
+      .logo-cloud-item img { height: 38px; max-width: 120px; }
     }
     @media (prefers-reduced-motion: reduce) { .logo-cloud-track { animation: none; } }
 
