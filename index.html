@@ -160,7 +160,8 @@
     .start-meta  { display: flex; gap: 40px; margin-bottom: 36px; }
     .start-meta-item strong { display: block; font-size: 32px; font-weight: 800; }
     .start-meta-item span   { font-size: 13px; opacity: 0.55; font-weight: 500; }
-    .start-card-img { width: 210px; flex-shrink: 0; border-left: 1.5px solid rgba(255,255,255,0.18); overflow: hidden; display: flex; align-items: flex-end; position: relative; }
+    .start-card-img { width: 210px; flex-shrink: 0; border-left: 1.5px solid rgba(255,255,255,0.18); overflow: hidden; display: flex; align-items: flex-end; }
+    .start-card-img img { width: 100%; display: block; filter: invert(1) grayscale(1); }
 
     /* ── QUESTION ────────────────────────────────── */
     .q-header { font-size: 14px; font-weight: 700; margin-bottom: 22px; }
@@ -600,7 +601,7 @@
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div class="start-card-img" id="catCanvas3d"></div>
+      <div class="start-card-img"><img src="assets/cat-start.webp" alt="" loading="lazy"></div>
     </div>
     <div class="dots-area" id="startDots"></div>
     <div class="logo-cloud">
@@ -1484,171 +1485,5 @@ document.addEventListener('mouseup',   () => document.documentElement.classList.
 })();
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-(function initCat3D() {
-  var container = document.getElementById('catCanvas3d');
-  if (!container || typeof THREE === 'undefined') return;
-
-  var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-  camera.position.set(0, 0.1, 7.0);
-
-  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-  var cvs = renderer.domElement;
-  cvs.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
-  container.appendChild(cvs);
-
-  function resize() {
-    var w = container.clientWidth, h = container.clientHeight;
-    if (!w || !h) return;
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Lighting
-  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-  var sun = new THREE.DirectionalLight(0xffffff, 1.9);
-  sun.position.set(2, 5, 6);
-  scene.add(sun);
-  var fill = new THREE.DirectionalLight(0xffffff, 0.35);
-  fill.position.set(-4, 0, 3);
-  scene.add(fill);
-
-  // Materials
-  var mFur   = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.72 });
-  var mDark  = new THREE.MeshStandardMaterial({ color: 0x0d0d0d, roughness: 0.55 });
-  var mShine = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.9 });
-  var mGray  = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.8 });
-
-  var cat = new THREE.Group();
-  scene.add(cat);
-
-  // Body
-  var body = new THREE.Mesh(new THREE.SphereGeometry(0.72, 32, 24), mFur);
-  body.scale.set(1.0, 1.3, 0.88);
-  body.position.y = -0.44;
-  cat.add(body);
-
-  // Head group — this is what tracks the mouse
-  var head = new THREE.Group();
-  head.position.y = 0.64;
-  cat.add(head);
-
-  head.add(new THREE.Mesh(new THREE.SphereGeometry(0.50, 32, 24), mFur));
-
-  // Cheeks
-  [-0.37, 0.37].forEach(function(x) {
-    var c = new THREE.Mesh(new THREE.SphereGeometry(0.21, 16, 12), mFur);
-    c.scale.set(1, 0.78, 0.65);
-    c.position.set(x, -0.13, 0.30);
-    head.add(c);
-  });
-
-  // Ears + inner ears
-  [-0.31, 0.31].forEach(function(x) {
-    var ear = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.36, 4), mFur);
-    ear.position.set(x, 0.44, 0.02);
-    ear.rotation.z = x < 0 ? 0.26 : -0.26;
-    head.add(ear);
-    var inner = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.20, 4), mDark);
-    inner.position.set(x * 0.95, 0.42, 0.07);
-    inner.rotation.z = ear.rotation.z;
-    head.add(inner);
-  });
-
-  // Eyes
-  [-0.19, 0.19].forEach(function(x) {
-    var eye = new THREE.Mesh(new THREE.SphereGeometry(0.084, 16, 16), mDark);
-    eye.position.set(x, 0.10, 0.455);
-    head.add(eye);
-    // Vertical pupil slit
-    var pupil = new THREE.Mesh(new THREE.BoxGeometry(0.020, 0.110, 0.012), mDark);
-    pupil.position.set(x, 0.10, 0.538);
-    head.add(pupil);
-    // Shine dot
-    var shine = new THREE.Mesh(new THREE.SphereGeometry(0.027, 8, 8), mShine);
-    shine.position.set(x + 0.030, 0.124, 0.535);
-    head.add(shine);
-  });
-
-  // Nose
-  var nose = new THREE.Mesh(new THREE.SphereGeometry(0.038, 8, 8), mDark);
-  nose.scale.set(1.3, 0.85, 0.9);
-  nose.position.set(0, -0.04, 0.492);
-  head.add(nose);
-
-  // Mouth
-  [-0.065, 0.065].forEach(function(x) {
-    var m = new THREE.Mesh(new THREE.BoxGeometry(0.007, 0.085, 0.007), mDark);
-    m.position.set(x, -0.115, 0.492);
-    m.rotation.z = x < 0 ? 0.44 : -0.44;
-    head.add(m);
-  });
-
-  // Whiskers (3 per side)
-  [-1, 1].forEach(function(side) {
-    [-0.055, 0.0, 0.055].forEach(function(dy, i) {
-      var w = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.0055, 0.0055), mGray);
-      w.position.set(side * 0.44, -0.065 + dy, 0.44);
-      w.rotation.z = i === 0 ? side * -0.13 : i === 2 ? side * 0.13 : 0;
-      head.add(w);
-    });
-  });
-
-  // Tail (CatmullRom tube)
-  var curve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3( 0.56, -1.00, 0.00),
-    new THREE.Vector3( 1.08, -0.68, 0.14),
-    new THREE.Vector3( 1.16, -0.16, 0.08),
-    new THREE.Vector3( 0.74,  0.22, 0.00)
-  ]);
-  cat.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 18, 0.075, 8, false), mFur));
-  // Tail tip ball
-  var tip = new THREE.Mesh(new THREE.SphereGeometry(0.10, 12, 12), mFur);
-  tip.position.copy(curve.getPoint(1));
-  cat.add(tip);
-
-  // Front paws
-  [-0.26, 0.26].forEach(function(x) {
-    var paw = new THREE.Mesh(new THREE.SphereGeometry(0.185, 16, 12), mFur);
-    paw.scale.set(1.05, 0.50, 1.18);
-    paw.position.set(x, -1.08, 0.52);
-    cat.add(paw);
-  });
-
-  // Natural slight lean
-  cat.rotation.y = 0.07;
-
-  // Mouse / touch tracking
-  var tX = 0, tY = 0, cX = 0, cY = 0;
-  document.addEventListener('mousemove', function(e) {
-    tY = (e.clientX / window.innerWidth  - 0.5) * 1.1;
-    tX = -(e.clientY / window.innerHeight - 0.5) * 0.62;
-  });
-  document.addEventListener('touchmove', function(e) {
-    var t = e.touches[0];
-    tY = (t.clientX / window.innerWidth  - 0.5) * 1.1;
-    tX = -(t.clientY / window.innerHeight - 0.5) * 0.62;
-  }, { passive: true });
-
-  function loop() {
-    requestAnimationFrame(loop);
-    cX += (tX - cX) * 0.055;
-    cY += (tY - cY) * 0.055;
-    head.rotation.x = cX;
-    head.rotation.y = cY;
-    cat.rotation.y  = 0.07 + cY * 0.18;
-    renderer.render(scene, camera);
-  }
-  loop();
-})();
-</script>
 </body>
 </html>
