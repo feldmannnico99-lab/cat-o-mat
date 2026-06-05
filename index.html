@@ -191,6 +191,18 @@
     .dot.active  { width: 14px; height: 14px; border: 2px solid white; background: transparent; }
     .dot.upcoming{ width: 9px;  height: 9px;  background: rgba(255,255,255,0.18); }
 
+    /* ── LOGO CLOUD ──────────────────────────────── */
+    .logo-cloud { margin-top: 52px; padding-bottom: 4px; }
+    .logo-cloud-label { font-size: 11px; font-weight: 500; letter-spacing: 1.8px; text-transform: uppercase; opacity: 0.35; text-align: center; margin-bottom: 26px; }
+    .logo-cloud-row { display: flex; align-items: center; justify-content: center; gap: 36px; flex-wrap: wrap; }
+    .logo-cloud-item { opacity: 0.42; transition: opacity 0.24s cubic-bezier(0.22,1,0.36,1), transform 0.24s cubic-bezier(0.22,1,0.36,1); }
+    .logo-cloud-item:hover { opacity: 1; transform: translateY(-3px); }
+    .logo-cloud-item img { height: 28px; width: auto; max-width: 110px; display: block; filter: invert(1) grayscale(1); object-fit: contain; }
+    @media (max-width: 600px) {
+      .logo-cloud-row { gap: 20px; }
+      .logo-cloud-item img { height: 22px; max-width: 82px; }
+    }
+
     /* ── RESULTS ─────────────────────────────────── */
     .results-label { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 20px; opacity: 0.6; }
     .top-match-hero { display: flex; align-items: flex-start; gap: 28px; margin-bottom: 20px; }
@@ -584,6 +596,15 @@
       <div class="start-card-img"><img src="assets/cat-start.webp" alt="" loading="lazy"></div>
     </div>
     <div class="dots-area" id="startDots"></div>
+    <div class="logo-cloud">
+      <div class="logo-cloud-label">Mit Liebe unterstützt durch</div>
+      <div class="logo-cloud-row">
+        <div class="logo-cloud-item"><img src="assets/logo-smartworx.webp" alt="Smartworx IT Systemhaus" loading="lazy"></div>
+        <div class="logo-cloud-item"><img src="assets/logo-hamacher.webp" alt="Hamacher Solar" loading="lazy"></div>
+        <div class="logo-cloud-item"><img src="assets/logo-houseofbates.webp" alt="House of Bates" loading="lazy"></div>
+        <div class="logo-cloud-item"><img src="assets/logo-essmann.webp" alt="Essmann Auto Luxus" loading="lazy"></div>
+      </div>
+    </div>
   </div>
 
   <!-- QUESTION -->
