@@ -192,16 +192,25 @@
     .dot.upcoming{ width: 9px;  height: 9px;  background: rgba(255,255,255,0.18); }
 
     /* ── LOGO CLOUD ──────────────────────────────── */
-    .logo-cloud { margin-top: 52px; padding-bottom: 4px; }
-    .logo-cloud-label { font-size: 11px; font-weight: 500; letter-spacing: 1.8px; text-transform: uppercase; opacity: 0.35; text-align: center; margin-bottom: 26px; }
-    .logo-cloud-row { display: flex; align-items: center; justify-content: center; gap: 36px; flex-wrap: wrap; }
-    .logo-cloud-item { opacity: 0.42; transition: opacity 0.24s cubic-bezier(0.22,1,0.36,1), transform 0.24s cubic-bezier(0.22,1,0.36,1); }
-    .logo-cloud-item:hover { opacity: 1; transform: translateY(-3px); }
-    .logo-cloud-item img { height: 28px; width: auto; max-width: 110px; display: block; filter: invert(1) grayscale(1); object-fit: contain; }
-    @media (max-width: 600px) {
-      .logo-cloud-row { gap: 20px; }
-      .logo-cloud-item img { height: 22px; max-width: 82px; }
+    .logo-cloud { margin-top: 52px; display: flex; align-items: center; overflow: hidden; }
+    .logo-cloud-label { flex-shrink: 0; width: 130px; padding-right: 24px; border-right: 1px solid rgba(255,255,255,0.18); font-size: 12px; line-height: 1.55; opacity: 0.45; text-align: right; }
+    .logo-cloud-slider-wrap { flex: 1; overflow: hidden; min-width: 0;
+      -webkit-mask-image: linear-gradient(to right, transparent, black 72px, black calc(100% - 72px), transparent);
+      mask-image: linear-gradient(to right, transparent, black 72px, black calc(100% - 72px), transparent);
     }
+    .logo-cloud-track { display: flex; align-items: center; gap: 64px; width: max-content; animation: logo-scroll 18s linear infinite; }
+    .logo-cloud-track:hover { animation-play-state: paused; }
+    @keyframes logo-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .logo-cloud-item { flex-shrink: 0; display: flex; align-items: center; padding: 0 4px; }
+    .logo-cloud-item img { height: 52px; width: auto; max-width: 180px; display: block; filter: invert(1) grayscale(1); object-fit: contain; opacity: 0.55; transition: opacity 0.22s ease; }
+    .logo-cloud-item:hover img { opacity: 1; }
+    @media (max-width: 600px) {
+      .logo-cloud { flex-direction: column; align-items: flex-start; gap: 18px; }
+      .logo-cloud-label { width: auto; padding-right: 0; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.18); padding-bottom: 14px; text-align: left; }
+      .logo-cloud-slider-wrap { width: 100%; }
+      .logo-cloud-item img { height: 38px; max-width: 130px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .logo-cloud-track { animation: none; } }
 
     /* ── RESULTS ─────────────────────────────────── */
     .results-label { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 20px; opacity: 0.6; }
@@ -597,12 +606,18 @@
     </div>
     <div class="dots-area" id="startDots"></div>
     <div class="logo-cloud">
-      <div class="logo-cloud-label">Mit Liebe unterstützt durch</div>
-      <div class="logo-cloud-row">
-        <div class="logo-cloud-item"><img src="assets/logo-smartworx.webp" alt="Smartworx IT Systemhaus" loading="lazy"></div>
-        <div class="logo-cloud-item"><img src="assets/logo-hamacher.webp" alt="Hamacher Solar" loading="lazy"></div>
-        <div class="logo-cloud-item"><img src="assets/logo-houseofbates.webp" alt="House of Bates" loading="lazy"></div>
-        <div class="logo-cloud-item"><img src="assets/logo-essmann.webp" alt="Essmann Auto Luxus" loading="lazy"></div>
+      <div class="logo-cloud-label">Mit Liebe<br>unterstützt<br>durch</div>
+      <div class="logo-cloud-slider-wrap">
+        <div class="logo-cloud-track">
+          <div class="logo-cloud-item"><img src="assets/logo-smartworx.webp" alt="Smartworx IT Systemhaus" loading="lazy"></div>
+          <div class="logo-cloud-item"><img src="assets/logo-hamacher.webp" alt="Hamacher Solar" loading="lazy"></div>
+          <div class="logo-cloud-item"><img src="assets/logo-houseofbates.webp" alt="House of Bates" loading="lazy"></div>
+          <div class="logo-cloud-item"><img src="assets/logo-essmann.webp" alt="Essmann Auto Luxus" loading="lazy"></div>
+          <div class="logo-cloud-item"><img src="assets/logo-smartworx.webp" alt="Smartworx IT Systemhaus" loading="lazy"></div>
+          <div class="logo-cloud-item"><img src="assets/logo-hamacher.webp" alt="Hamacher Solar" loading="lazy"></div>
+          <div class="logo-cloud-item"><img src="assets/logo-houseofbates.webp" alt="House of Bates" loading="lazy"></div>
+          <div class="logo-cloud-item"><img src="assets/logo-essmann.webp" alt="Essmann Auto Luxus" loading="lazy"></div>
+        </div>
       </div>
     </div>
   </div>
